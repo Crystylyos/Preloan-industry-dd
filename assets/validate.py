@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-preloan-industry-dd · 交付前 HTML 静态校验器（V5.3.0 新增）
+preloan-industry-dd · 交付前 HTML 静态校验器
+（V5.3.0 引入；V5.4.1 增专项三一致性校验；V5.4.2 抽出结构检查供自检复用）
 借鉴 research-report-builder 的「交付前必过校验」原则，但仅做静态检查，
 绝不执行页面 JS（避免 eval 外部内容的安全风险）。
 
@@ -58,17 +59,21 @@ def check_project_calc(data):
     if not (off or on):
         out.append("专项三 applicable 非布尔值（实际 %r）：须显式写 true 或 false" % (flag,))
 
+    # 合法的非项目制例外：note 已注明原因代码或「非项目制」，允许完整版下关闭专项三
+    note_txt = str(pc.get("note") or "")
+    exempt = ("数据缺失-D" in note_txt) or ("非项目制" in note_txt)
+
     if is_full and off:
         if has_data:
             out.append(
                 "专项三 applicable=false 但已产出测算数据（%s）：标记与数据矛盾，"
                 "整章会被误判为不适用，须改为 true" %
                 "、".join("%s %d 项" % (k, counts[k]) for k in PC_MIN if counts[k]))
-        else:
+        elif not exempt:
             extra = "，且已提供企业财务数据 %d 项" % n_company if n_company else ""
             out.append(
-                "专项三 applicable=false 且无测算数据%s：完整版须输出盈亏测算模板"
-                "（若确属非项目制行业，请改走轻量速览版，或补充企业整体授信口径的测算）" % extra)
+                "专项三 applicable=false 且无测算数据%s：完整版须输出盈亏测算模板；"
+                "确属非项目制行业时，须在 note 注明「非项目制」或「数据缺失-D」" % extra)
 
     if on:
         short = ["%s %d<%d" % (k, counts[k], PC_MIN[k]) for k in PC_MIN if counts[k] < PC_MIN[k]]
@@ -78,6 +83,28 @@ def check_project_calc(data):
                 "（门槛 params>=8 / firstYear>=4 / metrics>=4 / stress>=4）" % "、".join(short))
 
     return out
+
+
+def check_html_structure(html):
+    """零外部依赖 / 脚本标签配平。返回 problems 列表（供本脚本与 selftest 共用）。"""
+    problems = []
+    ext_patterns = [
+        (r'<script[^>]+\bsrc=', "<script src= 外部脚本"),
+        (r'<link\b[^>]*\bhref=', "<link href= 外部样式/字体"),
+        (r'@import', "@import 外部样式"),
+        (r'url\(\s*https?://', "url(http) 外部资源"),
+        (r'cdn\.', "cdn 外部依赖"),
+        (r'chart\.js', "chart.js 外部库"),
+    ]
+    for pat, desc in ext_patterns:
+        if re.search(pat, html, re.IGNORECASE):
+            problems.append("外部依赖：" + desc)
+
+    opens = len(re.findall(r'<script', html, re.IGNORECASE))
+    closes = len(re.findall(r'</script', html, re.IGNORECASE))
+    if opens != closes:
+        problems.append("脚本标签不配平：<script> %d 个 / </script> %d 个" % (opens, closes))
+    return problems
 
 
 def extract_report_data(html):
@@ -126,25 +153,7 @@ def main():
 
     problems = []
     warnings = []
-
-    # 1. 零外部依赖
-    ext_patterns = [
-        (r'<script[^>]+\bsrc=', "<script src= 外部脚本"),
-        (r'<link\b[^>]*\bhref=', "<link href= 外部样式/字体"),
-        (r'@import', "@import 外部样式"),
-        (r'url\(\s*https?://', "url(http) 外部资源"),
-        (r'cdn\.', "cdn 外部依赖"),
-        (r'chart\.js', "chart.js 外部库"),
-    ]
-    for pat, desc in ext_patterns:
-        if re.search(pat, html, re.IGNORECASE):
-            problems.append("外部依赖：" + desc)
-
-    # 2. 脚本配平
-    opens = len(re.findall(r'<script', html, re.IGNORECASE))
-    closes = len(re.findall(r'</script', html, re.IGNORECASE))
-    if opens != closes:
-        problems.append("脚本标签不配平：<script> %d 个 / </script> %d 个" % (opens, closes))
+    problems.extend(check_html_structure(html))
 
     # 3. 数据块存在
     blob = extract_report_data(html)

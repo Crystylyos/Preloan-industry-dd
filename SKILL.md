@@ -1,7 +1,7 @@
 ---
 name: preloan-industry-dd
 slug: preloan-industry-dd
-version: "5.4.1"
+version: "5.4.2"
 displayName: 商业银行贷前行业尽调与报告生成
 summary: 按七维度加四大专项框架产出银行贷前行业尽调报告，并生成单文件 HTML 可视化页面与可选 Word 文档。
 tags: [银行信贷, 贷前尽调, 行业风险, 报告生成, HTML报告]
@@ -122,7 +122,7 @@ homepage: https://skillhub.cn/skills/user_63ec19e2/preloan-industry-dd
 - **专项三开关须与输出模式严格对齐（硬规则）**：`applicable` 必须是布尔值 `true` / `false`，不得写成字符串。完整版（含企业财务数据的默认模式）**必须为 `true`**，并同时满足 `params` ≥ 8、`firstYear` ≥ 4、`metrics` ≥ 4、`stress` ≥ 4；仅轻量速览版可为 `false`。完整版下误写 `false` 会把整章测算压成一句"不适用说明"，且已产出的参数、收益、评价、压力测试数据全部不展示；`assets/validate.py` 对此直接判不合格、阻断交付。模板侧已加"数据优先"兜底（有测算数据即渲染，标记与数据冲突时提示复核），但数据侧仍须按本规则如实填写，不得依赖兜底。
 - 目标企业名称写入 `company.name`（或 `header.companyName`）：HTML 首屏「目标企业」标签与 Word 文档均读取该字段，缺失时标签自动省略。企业财务数值写入 `dimensions.profit.items[].ent`，行业均值沿用维度五标尺；企业数据与行业均值口径不一致时，偏离度须标注「口径不一致-建议复核」，不做未年化的直接相减。
 - 完整呈现 XML 报告全部内容；专项二须含"担保圈/互保风险类"标准化排查块。
-- 交付前运行 `python assets/validate.py <报告.html>` 确认零外部依赖、脚本完整、数据块可解析；轻量版与完整版各验一份。可用时补无头浏览器四屏目视（首屏 / 风险卡 / 表格 / 综合评估）。除首次静态校验外，定稿前还须完成一次独立于生成流程的返检（见「质量底线：交付前独立返检」章节），返检通过方可定稿。
+- 交付前先跑 `python assets/selftest.py` 做结构与契约自检（加 `--browser` 可追加真实渲染核验），再运行 `python assets/validate.py <报告.html>` 确认零外部依赖、脚本完整、数据块可解析；轻量版与完整版各验一份。可用时补无头浏览器四屏目视（首屏 / 风险卡 / 表格 / 综合评估）。除首次静态校验外，定稿前还须完成一次独立于生成流程的返检（见「质量底线：交付前独立返检」章节），返检通过方可定稿。
 - Word/PDF 交付：将 `REPORT_DATA` 导出为 `report_data.json` 后，运行 `assets/generate_docx.py` 生成格式化 Word 文档（含章节、表格、风险色卡），满足需归档或上会纸质材料的场景；PDF 可由 Word 另存获得。
 
 ## 轻量速览路径
@@ -201,6 +201,9 @@ homepage: https://skillhub.cn/skills/user_63ec19e2/preloan-industry-dd
 - `scripts/check_environment.py`：环境就绪检查（只读，不联网不读凭据）。
 - `assets/validate.py`：交付前 HTML 静态校验器（零外部依赖 / 脚本完整性 / 数据块校验）。
 - `references/install_publish_guide.md`：安装与发布说明（目录放置/市场安装/分发校验/回滚）。
+- `references/troubleshooting.md`：故障排查与降级指引。出错先查这里：30 秒定位表 + 每条「现象 / 原因 / 处置 / 降级」四段式。
+- `examples/`：三份可直接运行的最小 `REPORT_DATA`（完整版项目制 / 轻量速览版 / 非项目制），配 `README.md` 说明注入、校验与生成 Word 的用法。
+- `assets/selftest.py`：一键自检。校验模板占位符与章节数、样例注入、零外部依赖、专项三契约、Word 与 HTML 风险色同源；加 `--browser` 可追加真实渲染核验。
 
 ## 安装与分发
 

@@ -26,10 +26,13 @@ from docx.oxml import OxmlElement
 NAVY = RGBColor(0x1A, 0x2C, 0x4E)
 SLATE = RGBColor(0x46, 0x56, 0x6E)
 INK = RGBColor(0x1F, 0x27, 0x33)
-GREEN = "2E9E5B"
-YELLOW = "D9A300"
-RED = "D23B3B"
-SLATE_HEX = "46566E"
+# 风险四档色：与 assets/report_template.html 的 --risk-* 变量逐值一致，
+# 保证 HTML 与 Word 两份交付物色阶同源（旧版 Word 只有三档，「中高」被并入红档且色值不同）
+RISK_HIGH = "C0392B"
+RISK_MIDHIGH = "D2742B"
+RISK_MID = "B78A21"
+RISK_LOW = "1E7A52"
+RISK_UNKNOWN = "46566E"
 
 
 def shade_cell(cell, hex_color):
@@ -57,14 +60,27 @@ def set_cell_text(cell, text, bold=False, color=None, size=10, align=None):
 
 
 def risk_color(level):
+    """返回风险四档色（6 位 hex），与 HTML 模板 --risk-* 色阶逐值一致。
+
+    判定顺序即优先级：先「中高」再「高」。旧版按「含高即红」判定，导致
+    「中高风险」被染成高风险色，四档塌成三档，与页面不一致。
+    """
     s = str(level or "")
+    if "中高" in s:
+        return RISK_MIDHIGH
     if "高" in s:
-        return RED
+        return RISK_HIGH
     if "中" in s:
-        return YELLOW
+        return RISK_MID
     if "低" in s:
-        return GREEN
-    return SLATE_HEX
+        return RISK_LOW
+    return RISK_UNKNOWN
+
+
+def hex_rgb(h):
+    """6 位 hex 转为 RGBColor。"""
+    h = str(h or "")[:6].ljust(6, "0")
+    return RGBColor(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
 
 
 def add_heading(doc, text, level=1):
@@ -291,12 +307,11 @@ def build(data, out_path):
     for r in S.get("risks", []):
         tbl = doc.add_table(rows=1, cols=2)
         tbl.style = "Light Grid Accent 1"
+        lv_hex = risk_color(r.get("level", ""))
         set_cell_text(tbl.cell(0, 0), r.get("name", ""), bold=True, color=RGBColor(0xFF, 0xFF, 0xFF), size=10)
-        shade_cell(tbl.cell(0, 0), risk_color(r.get("level", "")))
+        shade_cell(tbl.cell(0, 0), lv_hex)
         set_cell_text(tbl.cell(0, 1), "风险等级：" + str(r.get("level", "")), bold=True,
-                      color=RGBColor(int(risk_color(r.get("level", ""))[0:2], 16),
-                                     int(risk_color(r.get("level", ""))[2:4], 16),
-                                     int(risk_color(r.get("level", ""))[4:6], 16)), size=10)
+                      color=hex_rgb(lv_hex), size=10)
         shade_cell(tbl.cell(0, 1), "F1F5FB")
         add_para(doc, r.get("desc", ""), bold_prefix="现状：")
         add_para(doc, r.get("path", ""), bold_prefix="信贷传导路径：")

@@ -511,11 +511,30 @@ function buildRadar(d){
 }
 
 /* 盈亏平衡分析图：固定成本 / 单位变动成本由基础参数表与首年测算反推，自洽复现 EBIT 口径；
-   仅在专项三适用（完整版）时调用，参数缺失返回 null 由调用方跳过 */
+   仅在专项三适用（完整版）时调用，参数缺失返回 null 由调用方跳过。
+   行业适配：产能 / 价格单位取自 params[].unit，金额按「亿元 / 万元 / 元」自动换算到万元；
+   折旧年限与其他固定费用可由 projectCalc.chart 覆盖（缺省 10 年 / 0）；坐标刻度按量级自适应，
+   不再写死「万吨 / 元每吨 / 固定费用 339 万元 / Y 轴 0–40000」。 */
 function buildBreakeven(pc){
-  const num=(s)=>{const n=parseFloat(String(s).replace(/[^\d.\-]/g,""));return Number.isFinite(n)?n:NaN;};
-  const param=(kw)=>{const x=list(pc.params).find(p=>(String(rec(p).name||"")).indexOf(kw)>=0);return x?num(rec(x).val):NaN;};
-  const fy=(kw)=>{const x=list(pc.firstYear).find(p=>(String(rec(p).name||"")).indexOf(kw)>=0);return x?num(rec(x).val):NaN;};
+  /* 数值解析：支持「3500 至 4000」「约 911」「-0.21」等写法，区间取中值；
+     旧实现直接剔除所有非数字字符，会把区间拼成一个巨大数字，属解析缺陷 */
+  const num=(s)=>{
+    const ms=String(s==null?"":s).replace(/,/g,"").match(/-?\d+(?:\.\d+)?/g);
+    if(!ms||!ms.length) return NaN;
+    if(ms.length>=2){
+      const a=parseFloat(ms[0]), b=parseFloat(ms[1]);
+      if(Number.isFinite(a)&&Number.isFinite(b)) return (a+b)/2;
+    }
+    return parseFloat(ms[0]);
+  };
+  const pick=(arr,kw)=>list(arr).find(p=>(String(rec(p).name||"")).indexOf(kw)>=0);
+  const param=(kw)=>{const x=pick(pc.params,kw);return x?num(rec(x).val):NaN;};
+  const fy=(kw)=>{const x=pick(pc.firstYear,kw);return x?num(rec(x).val):NaN;};
+  /* 金额单位取 unit 并去掉「/年」等后缀（亿元、万元、元） */
+  const moneyUnitOf=(arr,kw,fb)=>{
+    const x=pick(arr,kw), u=x?String(rec(x).unit||"").trim():"";
+    return (u||fb||"").replace(/\/.*$/,"").trim()||"万元";
+  };
   const cap=param("设计产能")||10;
   const P=param("产品现货单价");
   const invest=param("项目总投资");
@@ -523,44 +542,75 @@ function buildBreakeven(pc){
   const salesQ=fy("年销售量");
   const costY=fy("年营业成本");
   if(!(cap>0)||!(P>0)||!(invest>0)||!(interest>0)||!(salesQ>0)||!(costY>0)) return null;
-  const depYears=10, otherFixed=339;
-  const F=invest*10000/depYears + interest + otherFixed;   // 固定成本(万元)：折旧(总投资/10年)+利息+其他固定费用示例
-  const V=(costY*10000 - F)/salesQ;                        // 单位变动成本(元/吨)，由首年总成本反推
+
+  /* 金额统一换算到「万元」 */
+  const toWan=(u)=>(/亿/.test(u)?10000:(/万/.test(u)?1:(/元/.test(u)?0.0001:1)));
+  const investW=invest*toWan(moneyUnitOf(pc.params,"项目总投资","亿元"));
+  const costYW=costY*toWan(moneyUnitOf(pc.firstYear,"年营业成本","亿元"));
+  const interestW=interest*toWan(moneyUnitOf(pc.params,"年利息支出","万元"));
+
+  /* 行业单位与折旧假设：可由 projectCalc.chart 覆盖 */
+  const ch=rec(pc.chart);
+  const qUnit=String(ch.qUnit||"").trim()||
+    (String((pick(pc.params,"设计产能")&&rec(pick(pc.params,"设计产能")).unit)||"").replace(/\/.*$/,"").trim()||"单位");
+  const pUnit=String(ch.pUnit||"").trim()||
+    (String((pick(pc.params,"产品现货单价")&&rec(pick(pc.params,"产品现货单价")).unit)||"").trim()||"元/单位");
+  const depYears=Number(ch.depYears)>0?Number(ch.depYears):10;
+  const otherFixed=Number.isFinite(Number(ch.otherFixed))?Number(ch.otherFixed):0;
+
+  const F=investW/depYears + interestW + otherFixed;   // 固定成本（万元）
+  const V=(costYW - F)/salesQ;                          // 单位变动成本（与单价同单位）
   const noSolve=!(V>0)||!(P>V);
   const Qstar=noSolve?NaN:F/(P-V);
   const capLoss=P*cap-(F+V*cap);
   const critP=Math.round(V+F/cap), critV=Math.round(P-F/cap), gap=critP-P;
-  const crit = noSolve
-    ? `当前基准单价 ${P} 元/吨 ≤ 单位变动成本 ${V.toFixed(0)} 元/吨，边际贡献为负，任何产量均亏损、不存在盈亏平衡点；须先通过提价或降本使单价高于单位变动成本。`
-    : `当前基准参数下盈亏平衡点 ≈ ${Qstar.toFixed(1)} 万吨，高于设计产能 ${cap} 万吨，产能约束内无解；满产 ${cap} 万吨仍${capLoss>=0?"盈利":"亏损"}约 ${Math.abs(capLoss).toFixed(0)} 万元。要实现日常经营不亏损，至少满足其一：① 现货单价回升至 ≥ ${critP} 元/吨（现 ${P}，需再涨 ≥ ${gap} 元/吨，约 +${(gap/P*100).toFixed(1)}%）；② 单位变动成本降至 ≤ ${critV} 元/吨（靠规模化摊薄固定成本或工艺降本）；③ 设计产能扩张至 ≥ ${Qstar.toFixed(1)} 万吨且维持现单价。参考本报告敏感性测试：单价回升至 3600 元/吨且利用率 85% 时 EBIT +0.17 亿元、已盈利。`;
-  const noteTxt=`图中固定成本为行业基准示例拆分：折旧＝项目总投资 ${(invest*10000).toLocaleString()} 万元 ÷ ${depYears} 年、年利息 ${interest} 万元、其他固定费用示例 ${otherFixed} 万元，合计固定成本 ${F.toFixed(0)} 万元；单位变动成本 ${V.toFixed(0)} 元/吨，由首年总成本 ${(costY*10000).toLocaleString()} 万元（${costY} 亿元）反推（已复现 EBIT -0.21 亿元口径），非目标企业真实成本结构。实际授信测算须以企业真实完全成本、订单价、投资额与折旧政策复核；轻量版及专项三不适用时不展示本图。`;
-  const ML=64,MR=20,MT=24,MB=46,W=720,H=380,PW=W-ML-MR,PH=H-MT-MB,Y0=MT+PH;
-  const Qmax=Math.max(cap*1.6,(noSolve?cap+3:Qstar*1.3));
-  const Ymax=Math.max(F+V*Qmax,P*Qmax)*1.06;
-  const X=q=>ML+q/Qmax*PW, Y=v=>Y0-v/Ymax*PH;
+
+  /* 金额显示单位：量级达到 1 亿元用亿元，否则万元 */
+  const yDiv=Math.max(F,P*cap)>=10000?10000:1;
+  const yU=yDiv===10000?"亿元":"万元";
   const f=(v,d=0)=>Number(v).toFixed(d);
+  const money=(v,d=2)=>f(v/yDiv,d);
+
+  const crit = noSolve
+    ? `当前基准单价 ${P} ${pUnit} ≤ 单位变动成本 ${V.toFixed(0)} ${pUnit}，边际贡献为负，任何产量均亏损、不存在盈亏平衡点；须先通过提价或降本使单价高于单位变动成本。`
+    : `当前基准参数下盈亏平衡点 ≈ ${Qstar.toFixed(1)} ${qUnit}，${Qstar>cap?`高于设计产能 ${cap} ${qUnit}，产能约束内无解`:`低于设计产能 ${cap} ${qUnit}，产能约束内可实现`}；满产 ${cap} ${qUnit}${capLoss>=0?"盈利":"亏损"}约 ${f(Math.abs(capLoss))} 万元。要实现日常经营不亏损，至少满足其一：① 现货单价调整至 ≥ ${critP} ${pUnit}（现 ${P}，临界差 ${gap>0?"+":""}${gap} ${pUnit}，约 ${gap>0?"+":""}${(gap/P*100).toFixed(1)}%）；② 单位变动成本降至 ≤ ${critV} ${pUnit}（靠规模化摊薄固定成本或工艺降本）；③ 设计产能扩张至 ≥ ${Qstar.toFixed(1)} ${qUnit} 且维持现单价。可结合本报告「敏感性压力测试」中的价格与利用率情景复核。`;
+
+  const ebit=pick(pc.firstYear,"EBIT");
+  const ebitTxt=ebit?`（已复现 ${rec(ebit).name} ${rec(ebit).val} ${rec(ebit).unit||""} 口径）`:"";
+  const noteTxt=`图中固定成本为行业基准示例拆分：折旧＝项目总投资 ${investW.toLocaleString()} 万元 ÷ ${depYears} 年、年利息 ${interestW.toLocaleString()} 万元、${otherFixed?`其他固定费用 ${otherFixed} 万元`:"其他固定费用按 0 计（如需计入请在 projectCalc.chart.otherFixed 声明）"}，合计固定成本 ${F.toFixed(0)} 万元；单位变动成本 ${V.toFixed(0)} ${pUnit}，由首年总成本 ${costYW.toLocaleString()} 万元反推${ebitTxt}，非目标企业真实成本结构。实际授信测算须以企业真实完全成本、订单价、投资额与折旧政策复核；轻量版及专项三不适用时不展示本图。`;
+
+  const ML=64,MR=20,MT=24,MB=46,W=720,H=380,PW=W-ML-MR,PH=H-MT-MB,Y0=MT+PH;
+  const Qmax=Math.max(cap*1.6,noSolve?cap*1.3:Qstar*1.15);
+  const Ymax=Math.max(F+V*Qmax,P*Qmax)*1.06;
+  const niceStep=(max,n)=>{
+    if(!(max>0)) return 1;
+    const r=max/n, mag=Math.pow(10,Math.floor(Math.log10(r))), k=r/mag;
+    return (k<=1?1:k<=2?2:k<=5?5:10)*mag;
+  };
+  const yStep=niceStep(Ymax,4), xStep=niceStep(Qmax,5);
+  const X=q=>ML+q/Qmax*PW, Y=v=>Y0-v/Ymax*PH;
   let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="盈亏平衡分析图">`;
   s+=`<rect x="${X(cap)}" y="${MT}" width="${X(Qmax)-X(cap)}" height="${PH}" fill="color-mix(in srgb,var(--line) 22%,transparent)"/>`;
   if(!noSolve) s+=`<polygon points="${X(0)},${Y(0)} ${X(0)},${Y(F)} ${X(cap)},${Y(F+V*cap)} ${X(cap)},${Y(P*cap)}" fill="color-mix(in srgb,var(--risk-high) 14%,transparent)"/>`;
-  for(let q=0;q<=14;q+=2){ if(q>Qmax)break; s+=`<line x1="${X(q)}" y1="${MT}" x2="${X(q)}" y2="${Y0}" stroke="var(--line)"/>`; s+=`<text x="${X(q)}" y="${Y0+18}" font-size="12" fill="var(--muted)" text-anchor="middle">${q}</text>`; }
-  for(let v=0;v<=40000;v+=10000){ s+=`<line x1="${ML}" y1="${Y(v)}" x2="${W-MR}" y2="${Y(v)}" stroke="var(--line)"/>`; s+=`<text x="${ML-8}" y="${Y(v)+4}" font-size="12" fill="var(--muted)" text-anchor="end">${v/10000}</text>`; }
-  s+=`<text x="${ML+PW/2}" y="${H-6}" font-size="12" font-weight="600" fill="var(--ink-2)" text-anchor="middle">产量 Q（万吨）</text>`;
-  s+=`<text x="16" y="${MT+PH/2}" font-size="12" font-weight="600" fill="var(--ink-2)" text-anchor="middle" transform="rotate(-90 16 ${MT+PH/2})">金额（万元）</text>`;
+  for(let q=0;q<=Qmax+1e-9;q+=xStep){ s+=`<line x1="${X(q)}" y1="${MT}" x2="${X(q)}" y2="${Y0}" stroke="var(--line)"/>`; s+=`<text x="${X(q)}" y="${Y0+18}" font-size="12" fill="var(--muted)" text-anchor="middle">${f(q,xStep<1?1:0)}</text>`; }
+  for(let v=0;v<=Ymax+1e-9;v+=yStep){ s+=`<line x1="${ML}" y1="${Y(v)}" x2="${W-MR}" y2="${Y(v)}" stroke="var(--line)"/>`; s+=`<text x="${ML-8}" y="${Y(v)+4}" font-size="12" fill="var(--muted)" text-anchor="end">${f(v/yDiv,yStep<1?1:0)}</text>`; }
+  s+=`<text x="${ML+PW/2}" y="${H-6}" font-size="12" font-weight="600" fill="var(--ink-2)" text-anchor="middle">产量 Q（${qUnit}）</text>`;
+  s+=`<text x="16" y="${MT+PH/2}" font-size="12" font-weight="600" fill="var(--ink-2)" text-anchor="middle" transform="rotate(-90 16 ${MT+PH/2})">金额（${yU}）</text>`;
   s+=`<line x1="${X(cap)}" y1="${MT}" x2="${X(cap)}" y2="${Y0}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
-  s+=`<text x="${X(cap)}" y="${MT-6}" font-size="11" font-weight="700" fill="var(--muted)" text-anchor="middle">设计产能 ${f(cap)} 万吨</text>`;
+  s+=`<text x="${X(cap)}" y="${MT-6}" font-size="11" font-weight="700" fill="var(--muted)" text-anchor="middle">设计产能 ${f(cap)} ${qUnit}</text>`;
   s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(Qmax)}" y2="${Y(P*Qmax)}" stroke="var(--risk-low)" stroke-width="2.5"/>`;
   s+=`<line x1="${X(0)}" y1="${Y(F)}" x2="${X(Qmax)}" y2="${Y(F+V*Qmax)}" stroke="var(--risk-high)" stroke-width="2.5"/>`;
   if(!noSolve){ const qx=X(Qstar),qy=Y(P*Qstar); s+=`<circle cx="${qx}" cy="${qy}" r="5" fill="var(--card)" stroke="var(--gold)" stroke-width="2.5"/>`;
-    s+=`<text x="${qx}" y="${qy-10}" font-size="12" font-weight="700" fill="var(--gold)" text-anchor="middle">盈亏平衡点 ≈${f(Qstar,1)} 万吨</text>`;
-    s+=`<text x="${qx}" y="${qy+18}" font-size="10.5" fill="var(--muted)" text-anchor="middle">（产能约束外）</text>`; }
-  s+=`<text x="${X(cap)+6}" y="${Y((P*cap+(F+V*cap))/2)}" font-size="12" font-weight="700" fill="var(--risk-high)" text-anchor="start">满产 ${f(cap)} 万吨仍亏损 ≈${f(Math.abs(capLoss))} 万</text>`;
+    s+=`<text x="${qx}" y="${qy-10}" font-size="12" font-weight="700" fill="var(--gold)" text-anchor="middle">盈亏平衡点 ≈${f(Qstar,1)} ${qUnit}</text>`;
+    s+=`<text x="${qx}" y="${qy+18}" font-size="10.5" fill="var(--muted)" text-anchor="middle">（${Qstar>cap?"产能约束外":"产能约束内"}）</text>`; }
+  s+=`<text x="${X(cap)+6}" y="${Y((P*cap+(F+V*cap))/2)}" font-size="12" font-weight="700" fill="var(--risk-high)" text-anchor="start">满产 ${f(cap)} ${qUnit}仍${capLoss>=0?"盈利":"亏损"} ≈${money(Math.abs(capLoss))} ${yU}</text>`;
   if(noSolve) s+=`<text x="${ML+PW/2}" y="${MT+PH/2}" font-size="13" font-weight="700" fill="var(--risk-high)" text-anchor="middle">单价 ${f(P)} ≤ 单位变动成本 ${f(V)}：任何产量均亏损，无盈亏平衡点</text>`;
-  const lx=ML+10, ly=MT+10, lw=300, lh=52;
+  const lx=ML+10, ly=MT+10, lw=336, lh=52;
   s+=`<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" rx="6" fill="color-mix(in srgb,var(--card) 88%,transparent)" stroke="var(--line)"/>`;
   s+=`<line x1="${lx+12}" y1="${ly+18}" x2="${lx+44}" y2="${ly+18}" stroke="var(--risk-low)" stroke-width="2.5"/>`;
-  s+=`<text x="${lx+52}" y="${ly+22}" font-size="11.5" font-weight="600" fill="var(--ink-2)">总收入 TR = ${f(P)}×Q</text>`;
+  s+=`<text x="${lx+52}" y="${ly+22}" font-size="11.5" font-weight="600" fill="var(--ink-2)">总收入 TR = ${f(P)} ${pUnit} × Q</text>`;
   s+=`<line x1="${lx+12}" y1="${ly+36}" x2="${lx+44}" y2="${ly+36}" stroke="var(--risk-high)" stroke-width="2.5"/>`;
-  s+=`<text x="${lx+52}" y="${ly+40}" font-size="11.5" font-weight="600" fill="var(--ink-2)">总成本 TC = ${f(F)} + ${f(V)}×Q</text>`;
+  s+=`<text x="${lx+52}" y="${ly+40}" font-size="11.5" font-weight="600" fill="var(--ink-2)">总成本 TC = ${f(F)} 万元 + ${f(V)} × Q</text>`;
   return {svg:s+`</svg>`, crit, note:noteTxt};
 }
 
