@@ -15,25 +15,32 @@
 
 ## 安装
 
-本仓库**根目录就是技能内容**（`SKILL.md` 与 `assets/`、`references/` 同级），仓库里并没有 `preloan-industry-dd__skillhub/` 这个子目录——它只是安装时目标文件夹的命名。
+### 方式一：技能市场安装（推荐）
 
-### 方式一：git clone（推荐，便于后续升级）
+在 WorkBuddy 对话中输入「安装技能 preloan-industry-dd」，或到技能市场搜索「贷前行业尽调」，安装后重开会话即可。市场安装会自动处理目录命名与版本升级，无需手动拷贝。
+
+### 方式二：手动安装（离线 / 内网 / 从源码）
+
+先按来源确认顶层结构，避免多套一层：
+
+| 来源 | 解压或克隆后的顶层 | 处理 |
+|---|---|---|
+| 本仓库（git clone） | 根目录即技能内容（`SKILL.md` 与 `assets/`、`references/` 同级） | 见下方命令 |
+| `..._github.zip` | `preloan-industry-dd__skillhub/` 文件夹 | 直接复制 |
+| `..._vX.Y.Z.zip`（基础版） | `SKILL.md` 等散文件，无外层文件夹 | 自行放入同名文件夹 |
 
 ```bash
 git clone https://github.com/Crystylyos/Preloan-industry-dd.git \
   ~/.workbuddy/skills/preloan-industry-dd__skillhub
 ```
 
-升级时进入该目录执行 `git pull` 即可。
+也可下载 ZIP，把最外层目录重命名为 `preloan-industry-dd__skillhub`，整体复制到技能目录（已存在同名目录则覆盖，即完成升级）。
 
-### 方式二：下载压缩包
+目标目录名统一为 `preloan-industry-dd__skillhub`，三个平台路径一致：
 
-1. 仓库页右上 **Code → Download ZIP**；
-2. 解压后把最外层目录重命名为 `preloan-industry-dd__skillhub`；
-3. 整体复制到 `~/.workbuddy/skills/`（已存在同名目录则覆盖，即完成升级）；
-4. 重开一次 WorkBuddy 会话，技能自动加载。
+- Windows / macOS / Linux：`~/.workbuddy/skills/preloan-industry-dd__skillhub/`
 
-> 校验是否放对：目标目录下应能直接看到 `SKILL.md`。如果看到的是 `preloan-industry-dd__skillhub/SKILL.md` 之下的再一层同名目录，说明多套了一层，需要上提一层。
+> 校验：目标目录下应能直接看到 `SKILL.md`；若还隔着一层同名目录，说明多套了一层，需要上提。
 
 ## 使用
 
