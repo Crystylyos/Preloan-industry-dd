@@ -48,6 +48,36 @@ python assets/generate_docx.py examples/report_data_full.json 示例报告.docx
 
 需先 `pip install python-docx`；缺失时只交付 HTML。
 
+## 交付前返检（最短路径）
+
+生成完一份报告后按三步走，任何一步不过都不要交付：
+
+**第 1 步 · 结构自检**（与生成同源，属"首次校验"）
+
+```bash
+python assets/selftest.py
+```
+
+校验模板占位符唯一、章节数 15、样例注入无残留、专项三契约、Word 与 HTML 色阶同源。
+
+**第 2 步 · 独立渲染核验**（换工具、换视角）
+
+```bash
+python assets/selftest.py --browser
+```
+
+用无头浏览器真实渲染，确认正文无 `undefined` / `NaN`、专项三章节存在。**这一步才算独立于生成流程**——它能发现"生成逻辑本身写错"的问题，而第 1 步发现不了。
+
+**第 3 步 · 交付物静态校验 + 目视**
+
+```bash
+python assets/validate.py <你的报告.html>
+```
+
+再人工看四屏：首屏 / 风险卡 / 表格 / 综合评估，确认无溢出、重叠、断行。
+
+> 只跑第 1 步不算完成返检。第 1 步与生成同源，属于"自己验自己"。
+
 ## 改造建议
 
 - 换行业时，优先替换 `special.projectCalc.params` 与 `firstYear` 的 `name` / `unit` / `val`，**保留 `unit` 字段**——盈亏图的产量与金额单位直接取自它，缺失会回落为「单位 / 元每单位」。

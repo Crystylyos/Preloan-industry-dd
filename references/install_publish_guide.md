@@ -1,6 +1,6 @@
 # 安装与发布说明（preloan-industry-dd）
 
-适用版本：5.4.4。版本号见 SKILL.md frontmatter，历史变更见 `references/changelog.md`，出错处置见 `references/troubleshooting.md`。
+适用版本：5.4.5。版本号见 SKILL.md frontmatter，历史变更见 `references/changelog.md`，出错处置见 `references/troubleshooting.md`。
 
 ## 一、安装（Install）
 

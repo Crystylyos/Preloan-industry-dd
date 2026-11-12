@@ -6,14 +6,14 @@
 
 ## 顶层结构
 
-```json
+```text
 {
-  "header": { ... },          // 报告头部
-  "company": { ... },         // 可选：目标企业财务速览
+  "header":     { ... },      // 报告头部
+  "company":    { ... },      // 可选：目标企业财务速览
   "dimensions": { ... },      // 七大基础维度
-  "special": { ... },         // 四大专项模块
+  "special":    { ... },      // 四大专项模块
   "assessment": { ... },      // 综合评估
-  "notes": { ... },           // 报告核心说明
+  "notes":      { ... },      // 报告核心说明
   "disclaimer": "..."         // 免责声明
 }
 ```
@@ -101,7 +101,43 @@
     "risks":[{"name":"产能过剩价格战","level":"中高风险","desc":"产能利用率低位、价格下行","path":"盈利恶化→还款来源弱化","measures":"严控新增、存量压降","source":"【T1】Wind"}],
     "checklist":{"region":"江苏省","usage":"现场尽调核查","categories":[{"name":"合规资质类","items":["环评批复","安全生产许可证"]}],
       "guarantee":{"regionNote":"江浙沪互保高发","items":[{"name":"互保规模与对手方资质","content":"担保余额/净资产超30%即预警"}]}},
-    "projectCalc":{"applicable":true,"scenario":"新建组件产能","assumption":"区域平均水平","params":[],"firstYear":[],"metrics":[],"stress":[],"thresholds":{"normal":"IRR≥8%","caution":"IRR 5%-8%","forbid":"IRR<5%"},"source":"【T3】行业基准"},
+    "projectCalc": {
+      "applicable": true,
+      "note": "",
+      "scenario": "新建组件产能项目，用于判断产能类授信能否由项目自身现金流覆盖",
+      "assumption": "区域平均水平与行业通用参数，实际项目须替换真实成本结构",
+      "params": [
+        {"name": "设计产能", "unit": "MW/年", "val": "200", "note": "组件产线年产能"},
+        {"name": "产品现货单价", "unit": "元/W", "val": "0.85", "note": "组件含税均价"},
+        {"name": "项目总投资", "unit": "亿元", "val": "3.2", "note": "含设备与土建"},
+        {"name": "年利息支出", "unit": "万元", "val": "1200", "note": "贷款占比 60%、利率 3.5% 估算"},
+        {"name": "基准产能利用率", "unit": "%", "val": "75", "note": "行业景气中枢"},
+        {"name": "银行贷款占比", "unit": "%", "val": "60", "note": "项目融资结构"},
+        {"name": "贷款年利率", "unit": "%", "val": "3.5", "note": "制造业中长期贷款"},
+        {"name": "单位产能投资", "unit": "元/W", "val": "1.6", "note": "行业投资强度"}
+      ],
+      "firstYear": [
+        {"name": "年销售量", "unit": "MW", "val": "150", "logic": "设计产能 × 利用率"},
+        {"name": "年营业收入", "unit": "亿元", "val": "1.28", "logic": "销量 × 单价"},
+        {"name": "年营业成本", "unit": "亿元", "val": "1.15", "logic": "材料 + 人工 + 制造费用"},
+        {"name": "EBIT（未扣期间费用与折旧）", "unit": "亿元", "val": "0.13", "logic": "营业收入 − 营业成本"}
+      ],
+      "metrics": [
+        {"name": "全投资内部收益率 IRR", "unit": "%", "val": "7.8", "eval": "达标"},
+        {"name": "静态投资回收期", "unit": "年", "val": "8.1", "eval": "达标"},
+        {"name": "利息保障倍数", "unit": "倍", "val": "2.4", "eval": "审慎"},
+        {"name": "贷款偿还期", "unit": "年", "val": "9.0", "eval": "达标"}
+      ],
+      "stress": [
+        {"name": "组件价格下跌 10%", "change": "IRR 降至 4.9%", "judge": "不可接受"},
+        {"name": "销量下降 20%", "change": "IRR 降至 5.2%", "judge": "审慎"},
+        {"name": "硅料成本上涨 15%", "change": "IRR 降至 6.0%", "judge": "审慎"},
+        {"name": "融资利率上行 100BP", "change": "IRR 降至 7.2%", "judge": "可控"}
+      ],
+      "thresholds": {"normal": "IRR ≥ 8%", "caution": "IRR 5%–8%", "forbid": "IRR < 5%"},
+      "source": "【T3】行业基准示例值",
+      "chart": {"depYears": 10, "otherFixed": 0}
+    },
     "esg":{"env":{"intensity":"中","substitution":"高","carbon":"CBAM敞口中等"},"social":{"labor":"正常","supply":"需溯源"},"gov":{"record":"无重大处罚","disclosure":"较好"},"fit":{"rating":"中性","support":"清洁技术","constraint":"环评前置"},"source":"【T1】生态环境部"}
   },
   "assessment":{"radar":{"policy":2,"cycle":3,"profit":3,"supply":4,"finance":3,"score":3.0},

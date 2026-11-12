@@ -1,7 +1,7 @@
 ---
 name: preloan-industry-dd
 slug: preloan-industry-dd
-version: "5.4.4"
+version: "5.4.5"
 displayName: 商业银行贷前行业尽调与报告生成
 summary: 按七维度加四大专项框架产出银行贷前行业尽调报告，并生成单文件 HTML 可视化页面与可选 Word 文档。
 tags: [银行信贷, 贷前尽调, 行业风险, 报告生成, HTML报告]
@@ -188,23 +188,35 @@ homepage: https://skillhub.cn/skills/user_63ec19e2/preloan-industry-dd
 
 ## 配套资源
 
+### 契约与规范（改数据或样式前必读）
+
 - `references/output_schema.md`：完整 XML 标签体系、全局约定、数据缺失代码、四大专项与综合评估结构。生成报告前必读。
-- `references/user_prompt_template.md`：用户查询模板，含占位符与 HTML 配套页面输出要求，供向用户收集输入或生成用户侧提示词时使用。
+- `references/data_contract.md`：`REPORT_DATA` / `report_data.json` 的 JSON 字段结构与 XML 映射契约。
 - `references/html_ui_spec_v2.md`：HTML 页面 UI 契约（设计令牌、骨架、组件状态、渲染契约、验收清单）；改动样式前必读。
+
+### 模板与脚本
+
 - `assets/report_template.html`：单文件 HTML 模板，固定 15 章节与全部样式交互，仅保留 `__REPORT_DATA__` 占位符；复制后逐字替换占位符即可生成交付页面。
 - `assets/generate_docx.py`：Word 文档生成脚本。接收与 `REPORT_DATA` 同构的 `report_data.json`，输出含章节、表格、风险色卡的格式化 Word 文档，满足归档与上会需求。
+- `assets/validate.py`：交付前 HTML 静态校验器（零外部依赖 / 脚本配平 / 数据块可解析 / 专项三契约）。
+- `assets/selftest.py`：一键自检，串联模板结构、样例注入、专项三契约与 Word/HTML 色阶同源；加 `--browser` 追加真实渲染核验。
+- `assets/icon.png`：技能图标（512×512 PNG，圆角外透明）。技能市场与客户端展示用；本机安装态图标由平台按 `iconSource` 下发。
+
+### 参考文档
+
 - `references/source_tiers.md`：来源分级 T1–T4 与信贷核查溯源规则，将信源等级写进数据模型。
-- `references/data_contract.md`：REPORT_DATA / report_data.json 的 JSON 字段结构与 XML 映射契约。
 - `references/setup-guide.md`：依赖配置与就绪指南（python-docx 与可选 MCP）。
+- `references/install_publish_guide.md`：安装与发布（三种分发形态的顶层结构、分发校验、回滚）。
+- `references/troubleshooting.md`：故障排查与降级。出错先查这里：30 秒定位表 + 每条「现象 / 原因 / 处置 / 降级」四段式。
+- `references/user_prompt_template.md`：用户查询模板，含占位符与 HTML 配套页面输出要求。
 - `references/changelog.md`：版本沿革。
-- `skill-dependencies.json`：依赖清单（必需/可选）。
-- `scripts/check_environment.py`：环境就绪检查（只读，不联网不读凭据）。
-- `assets/validate.py`：交付前 HTML 静态校验器（零外部依赖 / 脚本完整性 / 数据块校验）。
-- `references/install_publish_guide.md`：安装与发布说明（目录放置/市场安装/分发校验/回滚）。
-- `references/troubleshooting.md`：故障排查与降级指引。出错先查这里：30 秒定位表 + 每条「现象 / 原因 / 处置 / 降级」四段式。
+
+### 样例与声明
+
 - `examples/`：三份可直接运行的最小 `REPORT_DATA`（完整版项目制 / 轻量速览版 / 非项目制），配 `README.md` 说明注入、校验与生成 Word 的用法。
-- `assets/selftest.py`：一键自检。校验模板占位符与章节数、样例注入、零外部依赖、专项三契约、Word 与 HTML 风险色同源；加 `--browser` 可追加真实渲染核验。
-- `assets/icon.png`：技能图标（512×512 PNG，圆角外透明，深蓝底 + 罗盘与行业元素）。技能市场与客户端展示用；本机安装态图标由平台按 `iconSource` 下发，替换需在平台上架页同步更新。
+- `skill-dependencies.json`：依赖清单（必需 / 可选）。
+- `scripts/check_environment.py`：环境就绪检查（只读，不联网不读凭据）。
+- `变更说明.md`：相对原版 v1.0.2 的逐文件变更总览，供上架审核参考。
 
 ## 安装与分发
 

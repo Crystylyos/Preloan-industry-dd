@@ -1,5 +1,16 @@
 # preloan-industry-dd 版本沿革
 
+## v5.4.5（2026-11-13）
+
+本轮针对 SkillHub TRACE 评测（4.8/5）中「说明与实际不一致、版本信息冲突、目录说明有误」的系统性整改，**逐项用脚本核出证据后再修**。
+
+- **修复文档示例不可运行**：`references/data_contract.md` 的「最小可用示例」原本 `applicable: true` 但 `params` / `firstYear` / `metrics` / `stress` 全为空数组，照抄必然被 `validate.py` 判不合格——这正是评测所说「照着示例却无法通过检查」。现补全为可通过校验的最小样例（8 参数 / 4 项首年测算 / 4 指标 / 4 压力场景）。
+- **结构示意块不再冒充可执行示例**：`data_contract.md` 顶层的字段总览块含 `//` 注释与 `...` 省略号，原标为 `json`，容易被当作合法 JSON 解析并报错；现改标 `text`，与真正可运行的示例区分开。
+- **修复版本号冲突**：`references/troubleshooting.md` 开头原写死「适用版本 5.4.2」，落后于实际版本。现改为动态引用「与 `SKILL.md` frontmatter 的 `version` 一致」，不再单独维护版本号，从根上避免下次再对不上。
+- **补全目录结构**：`README.md` 的目录树原漏掉 `assets/`、`examples/`、`scripts/`、`变更说明.md` 四个顶层项，且 `selftest.py`、`icon.png`、`troubleshooting.md` 完全未提及。现按 `assets/` / `examples/` / `references/` / `scripts/` 分组列出全部文件及用途。
+- **`SKILL.md` 配套资源重排**：原 17 项按写作先后混排（references 与 assets、根文件交错），现按「契约与规范 / 模板与脚本 / 参考文档 / 样例与声明」四组归类，并补齐遗漏的 `变更说明.md`。
+- **独立返检落地**：`examples/README.md` 新增「交付前返检（最短路径）」，给出三步可执行流程——① `selftest.py` 结构自检（与生成同源，属首次校验）；② `selftest.py --browser` 真实渲染（换工具换视角，这一步才算独立）；③ `validate.py` 校验交付件 + 四屏目视。并明确「只跑第 1 步不算完成返检」。
+
 ## v5.4.4（2026-11-13）
 
 本次为**安装说明准确性**与**署名**修订，不改功能与数据契约。
