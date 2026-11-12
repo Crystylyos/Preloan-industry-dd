@@ -1,0 +1,20 @@
+{
+  "name": "preloan-industry-dd",
+  "version": "5.4.0",
+  "required": [
+    {
+      "id": "python-docx",
+      "type": "python-package",
+      "purpose": "Word 文档生成（assets/generate_docx.py）",
+      "install": "pip install python-docx",
+      "fallback": "仅交付 HTML/XML/Markdown，跳过 Word；PDF 由 Word 另存获得"
+    }
+  ],
+  "optional": [
+    {"id": "wind", "type": "mcp", "purpose": "行情与行业数据", "fallback": "回落网页检索（WebSearch）"},
+    {"id": "mx-ds-mcp", "type": "mcp", "purpose": "同花顺妙想行业/财报数据", "fallback": "回落网页检索"},
+    {"id": "qcc-company", "type": "mcp", "purpose": "工商与司法风险信号", "fallback": "回落网页检索与部委官网"},
+    {"id": "pkulaw", "type": "mcp", "purpose": "法规与监管文本", "fallback": "回落部委官网检索"}
+  ],
+  "runtime": {"python": ">=3.8", "tools": ["WebSearch"]}
+}

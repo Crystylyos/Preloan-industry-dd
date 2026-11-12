@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>商业银行贷前行业尽调报告</title>
+<style>
+/* ==========================================================================
+   贷前行业尽调报告 · 视觉系统 v2
+   设计目标：信贷评审场景，10 秒内抓到评级/结论/核心风险；长文档可定位、可打印。
+   ========================================================================== */
+:root{
+  /* 文字 */
+  --ink:#16233A; --ink-2:#3B4A61; --muted:#6B7A90; --faint:#9AA7B8;
+  /* 品牌 */
+  --navy:#122C4A; --navy-2:#1E4E79; --gold:#B8863B; --gold-soft:#F7F0E2;
+  /* 表面 */
+  --bg:#F4F6F9; --card:#FFFFFF; --soft:#F7F9FC; --blue-soft:#EDF3FA;
+  --line:#E3E8EF; --line-2:#EEF2F7;
+  /* 语义 */
+  --risk-high:#C0392B; --risk-midhigh:#D2742B; --risk-mid:#B78A21; --risk-low:#1E7A52;
+  --risk-high-bg:#FBEAE8; --risk-midhigh-bg:#FDF0E4; --risk-mid-bg:#FBF4DF; --risk-low-bg:#E8F5EE;
+  --info:#1E4E79; --info-bg:#EDF3FA;
+  /* 尺度：4px 基准 */
+  --r-l:14px; --r:10px; --r-s:6px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px;
+  --shadow:0 1px 2px rgba(18,44,74,.04), 0 10px 28px rgba(18,44,74,.055);
+  --shadow-lift:0 2px 6px rgba(18,44,74,.06), 0 18px 44px rgba(18,44,74,.10);
+  --font:"Microsoft YaHei","微软雅黑",sans-serif;
+  --mono:var(--font);
+}
+html[data-theme="dark"]{
+  --ink:#E8EDF5; --ink-2:#B9C5D6; --muted:#8A99AE; --faint:#6C7C92;
+  --navy:#8FB6DC; --navy-2:#A9C8E8; --gold:#D8AC68; --gold-soft:#33291A;
+  --bg:#0E1622; --card:#151F2E; --soft:#1A2637; --blue-soft:#1B2E44;
+  --line:#28374B; --line-2:#202E40;
+  --risk-high:#F0796C; --risk-midhigh:#E9A05A; --risk-mid:#DDBA55; --risk-low:#5DC194;
+  --risk-high-bg:#3A1E1E; --risk-midhigh-bg:#3A2918; --risk-mid-bg:#332C17; --risk-low-bg:#173126;
+  --info:#9CC4EC; --info-bg:#1B2E44;
+  --shadow:0 1px 2px rgba(0,0,0,.20), 0 10px 28px rgba(0,0,0,.26);
+  --shadow-lift:0 2px 6px rgba(0,0,0,.24), 0 18px 44px rgba(0,0,0,.34);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:132px;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+  font-size:14px;line-height:1.75;-webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;transition:background .25s,color .25s;}
+a{color:var(--navy-2);}
+button{font-family:inherit;cursor:pointer;}
+:focus-visible{outline:2px solid var(--navy-2);outline-offset:3px;border-radius:4px;}
+.skip{position:absolute;left:-9999px;top:0;background:var(--navy);color:#fff;padding:10px 16px;z-index:200;border-radius:0 0 8px 0;}
+.skip:focus{left:0;}
+::selection{background:rgba(184,134,59,.22);}
+
+/* ---------- 顶部工具条 ---------- */
+.topbar{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--card) 92%,transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+.topbar-inner{max-width:1440px;margin:0 auto;padding:10px 28px;display:flex;align-items:center;gap:20px;min-height:58px;}
+.brand{display:flex;align-items:center;gap:11px;min-width:0;flex:1;}
+.brand-mark{width:34px;height:34px;flex:none;border-radius:9px;background:linear-gradient(145deg,#122C4A,#1E4E79);
+  color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.06em;
+  box-shadow:0 4px 12px rgba(18,44,74,.22);}
+.brand-txt{display:flex;flex-direction:column;line-height:1.35;min-width:0;}
+.brand-txt b{font-size:13.5px;letter-spacing:.02em;}
+.brand-txt span{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap;}
+.topbar-actions{display:flex;gap:8px;flex:none;}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--soft);
+  color:var(--ink-2);border-radius:var(--r-s);padding:6px 12px;font-size:12px;font-weight:600;
+  transition:background .16s,border-color .16s,transform .16s,color .16s;}
+.btn:hover{background:var(--blue-soft);border-color:var(--navy-2);color:var(--navy);}
+.btn:active{transform:translateY(1px);}
+.btn--primary{background:var(--navy);border-color:var(--navy);color:#fff;}
+html[data-theme="dark"] .btn--primary{background:#24466A;border-color:#3A628C;color:#fff;}
+.btn--primary:hover{background:var(--navy-2);color:#fff;}
+.toc-strip{display:none;gap:4px;overflow-x:auto;padding:0 20px 8px;scrollbar-width:thin;}
+.toc-strip::-webkit-scrollbar{height:3px;}
+.toc-strip::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+.toc-strip a{white-space:nowrap;font-size:12px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:20px;border:1px solid transparent;}
+.toc-strip a:hover{background:var(--soft);color:var(--navy-2);}
+.toc-strip a.active{background:var(--blue-soft);color:var(--navy);border-color:var(--line);font-weight:700;}
+
+/* ---------- Hero ---------- */
+.hero{background:linear-gradient(118deg,#0F2742 0%,#173A5E 52%,#1E4E79 100%);color:#fff;position:relative;overflow:hidden;}
+.hero::after{content:"";position:absolute;right:-140px;top:-180px;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(circle,rgba(184,134,59,.20),rgba(184,134,59,0) 68%);pointer-events:none;}
+.hero::before{content:"";position:absolute;inset:0;opacity:.055;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:44px 44px;}
+.hero-inner{max-width:1440px;margin:0 auto;padding:38px 28px 42px;display:grid;grid-template-columns:minmax(0,1fr) 306px;gap:44px;position:relative;z-index:1;}
+.eyebrow{display:flex;align-items:center;gap:12px;font-size:10.5px;font-weight:700;letter-spacing:.18em;color:#D9B77A;text-transform:uppercase;}
+.eyebrow-line{width:34px;height:1px;background:#D9B77A;opacity:.7;}
+.hero h1{margin:14px 0 10px;font-size:27px;line-height:1.36;font-weight:700;letter-spacing:.01em;max-width:900px;}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:#C4D4E6;margin-top:6px;}
+.hero-meta i{font-style:normal;color:#8FA9C6;margin-right:5px;}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+.hero-tag{font-size:11.5px;padding:4px 11px;border-radius:20px;background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.20);color:#DCE8F5;backdrop-filter:blur(4px);}
+.hero-tag b{color:#F0D6A4;font-weight:700;}
+.hero-quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:26px;
+  border-top:1px solid rgba(255,255,255,.16);padding-top:15px;max-width:820px;}
+.hero-quick>div{padding:0 16px;border-right:1px solid rgba(255,255,255,.13);}
+.hero-quick>div:first-child{padding-left:0;}
+.hero-quick>div:last-child{border-right:none;}
+.qk{font-size:10.5px;letter-spacing:.09em;color:#9FB7D1;font-weight:600;}
+.qv{font-size:13.5px;font-weight:700;color:#F2E3C4;margin-top:2px;line-height:1.55;}
+.score-card{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.19);border-radius:var(--r-l);
+  padding:20px 22px;backdrop-filter:blur(10px);align-self:start;box-shadow:0 16px 40px rgba(0,0,0,.16);}
+.score-label{font-size:11px;letter-spacing:.12em;color:#B9CBE0;font-weight:600;}
+.score-main{display:flex;align-items:baseline;gap:9px;margin:6px 0 2px;}
+.score-value{font-family:var(--mono);font-size:46px;font-weight:700;line-height:1;color:#F3D9A6;letter-spacing:-.03em;}
+.score-out{font-size:11.5px;color:#A9C0D8;}
+.score-badge{display:inline-flex;margin:12px 0 16px;}
+.score-bars{border-top:1px solid rgba(255,255,255,.15);padding-top:14px;display:grid;gap:9px;}
+.score-bar{display:grid;grid-template-columns:34px 1fr 20px;align-items:center;gap:9px;font-size:11px;color:#C8D8E9;}
+.score-track{height:5px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden;}
+.score-fill{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#D9B77A,#F0D6A4);}
+.score-bar b{font-family:var(--mono);text-align:right;color:#F0D6A4;font-weight:600;}
+
+/* ---------- 布局 ---------- */
+.layout{max-width:1440px;margin:0 auto;padding:28px 28px 80px;display:grid;grid-template-columns:216px minmax(0,1fr);gap:28px;align-items:start;}
+.sidenav{position:sticky;top:92px;max-height:calc(100vh - 116px);overflow-y:auto;scrollbar-width:thin;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-l);padding:18px 14px;box-shadow:var(--shadow);}
+.sidenav::-webkit-scrollbar{width:4px;}
+.sidenav::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+.side-title{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--faint);padding:0 8px 10px;text-transform:uppercase;}
+.side-group{margin-bottom:14px;}
+.side-group>span{display:block;font-size:10.5px;font-weight:700;color:var(--gold);letter-spacing:.08em;padding:6px 8px;}
+.side-group a{display:block;font-size:12.5px;color:var(--ink-2);text-decoration:none;padding:6px 9px;border-radius:var(--r-s);
+  border-left:2px solid transparent;line-height:1.45;transition:background .15s,color .15s,border-color .15s;}
+.side-group a:hover{background:var(--soft);color:var(--navy-2);}
+.side-group a.active{background:var(--blue-soft);color:var(--navy);border-left-color:var(--gold);font-weight:700;}
+.side-foot{border-top:1px solid var(--line-2);margin-top:12px;padding:12px 8px 0;font-size:11px;color:var(--faint);line-height:1.6;}
+.wrap{min-width:0;}
+
+/* ---------- 卡片 / 章节 ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-l);margin-bottom:20px;
+  box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .2s,transform .2s;scroll-margin-top:132px;}
+.card:hover{box-shadow:var(--shadow-lift);}
+.card--accent{border-top:3px solid var(--gold);}
+.card--alert{border-top:3px solid var(--risk-high);}
+.sec-head{display:flex;align-items:flex-start;gap:14px;padding:22px 26px 16px;border-bottom:1px solid var(--line-2);}
+.sec-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);background:var(--gold-soft);
+  border:1px solid color-mix(in srgb,var(--gold) 26%,transparent);border-radius:var(--r-s);padding:3px 8px;line-height:1.5;flex:none;margin-top:3px;}
+.sec-title{flex:1;min-width:0;}
+.sec-title h2{margin:0;font-size:18.5px;line-height:1.4;color:var(--navy);font-weight:700;letter-spacing:.01em;}
+.sec-sub{margin:4px 0 0;font-size:12px;color:var(--muted);line-height:1.6;}
+.sec-conclusion{flex:none;padding-top:3px;}
+.sec-body{padding:20px 26px 24px;}
+.sub-head{display:flex;align-items:center;gap:9px;margin:26px 0 12px;font-size:13.5px;color:var(--navy);font-weight:700;letter-spacing:.02em;}
+.sub-head:first-child{margin-top:0;}
+.sub-bar{width:3px;height:14px;border-radius:2px;background:var(--gold);flex:none;}
+
+/* ---------- 指标块 ---------- */
+.grid{display:grid;gap:12px;}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr));}
+.g5{grid-template-columns:repeat(5,minmax(0,1fr));}
+.kv{background:var(--soft);border:1px solid var(--line-2);border-radius:var(--r);padding:12px 14px;min-width:0;}
+.kv .k{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.03em;line-height:1.5;}
+.kv .v{font-size:14px;font-weight:650;margin-top:5px;color:var(--ink);line-height:1.65;overflow-wrap:anywhere;}
+.kv--long .v{font-size:12.5px;font-weight:500;line-height:1.85;color:var(--ink-2);}
+.kv--metric .v{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--navy-2);letter-spacing:-.02em;}
+.kv--metric .k{letter-spacing:.06em;}
+.stat-row{margin-bottom:16px;}
+
+/* ---------- 徽标 / 状态 ---------- */
+.enum,.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:20px;font-size:12px;font-weight:700;line-height:1.6;white-space:nowrap;}
+.enum::before,.pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.85;}
+.e-high,.p-red{background:var(--risk-high-bg);color:var(--risk-high);border:1px solid color-mix(in srgb,var(--risk-high) 25%,transparent);}
+.e-midhigh{background:var(--risk-midhigh-bg);color:var(--risk-midhigh);border:1px solid color-mix(in srgb,var(--risk-midhigh) 25%,transparent);}
+.p-orange{background:var(--risk-midhigh-bg);color:var(--risk-midhigh);border:1px solid color-mix(in srgb,var(--risk-midhigh) 25%,transparent);}
+.e-mid,.p-yellow{background:var(--risk-mid-bg);color:var(--risk-mid);border:1px solid color-mix(in srgb,var(--risk-mid) 25%,transparent);}
+.e-low,.p-green{background:var(--risk-low-bg);color:var(--risk-low);border:1px solid color-mix(in srgb,var(--risk-low) 25%,transparent);}
+.e-default,.p-default{background:var(--soft);color:var(--ink-2);border:1px solid var(--line);}
+.enum.on-dark{background:rgba(255,255,255,.14);color:#F6E2B8;border-color:rgba(255,255,255,.22);}
+.tag{display:inline-block;background:var(--blue-soft);color:var(--navy-2);border:1px solid var(--line);
+  border-radius:var(--r-s);padding:3px 9px;font-size:11.5px;line-height:1.6;margin:3px 5px 3px 0;}
+.tier{display:inline-block;padding:1px 7px;border-radius:5px;font-size:10.5px;font-weight:800;margin-right:5px;vertical-align:1px;white-space:nowrap;}
+.tier.t1{background:#E2F1E8;color:#1E6F48;}
+.tier.t2{background:#E4EEF9;color:#1B5391;}
+.tier.t3{background:#ECEFF4;color:#4A5B73;}
+.tier.t4{background:#FAEBDC;color:#A1551B;}
+html[data-theme="dark"] .tier.t1{background:#17382A;color:#79D6A6;}
+html[data-theme="dark"] .tier.t2{background:#1B3350;color:#96C4F2;}
+html[data-theme="dark"] .tier.t3{background:#26313F;color:#B6C4D6;}
+html[data-theme="dark"] .tier.t4{background:#3A2818;color:#E7AC73;}
+
+/* ---------- 提示块（4 态） ---------- */
+.note{display:flex;gap:12px;border-radius:var(--r);padding:12px 15px;margin:9px 0;font-size:13px;line-height:1.8;
+  background:var(--soft);border:1px solid var(--line-2);border-left:3px solid var(--line);color:var(--ink-2);}
+.note-label{flex:none;font-size:11.5px;font-weight:800;letter-spacing:.02em;padding-top:1px;min-width:76px;color:var(--muted);}
+.note-text{min-width:0;overflow-wrap:anywhere;}
+.note-text b{color:var(--ink);font-weight:700;}
+.note--tip{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 22%,transparent);border-left-color:var(--gold);}
+.note--tip .note-label{color:var(--gold);}
+.note--key{background:var(--blue-soft);border-color:var(--line);border-left-color:var(--navy-2);}
+.note--key .note-label{color:var(--navy-2);}
+.note--warn{background:var(--risk-high-bg);border-color:color-mix(in srgb,var(--risk-high) 22%,transparent);border-left-color:var(--risk-high);}
+.note--warn .note-label{color:var(--risk-high);}
+.redalert{display:flex;align-items:center;gap:9px;background:var(--risk-high-bg);border:1px solid var(--risk-high);
+  color:var(--risk-high);padding:11px 15px;border-radius:var(--r);font-weight:700;margin-bottom:16px;font-size:13px;}
+
+/* ---------- 表格 ---------- */
+.table-scroll{width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);margin:10px 0 16px;
+  scrollbar-width:thin;background:var(--card);}
+.table-scroll::-webkit-scrollbar{height:7px;}
+.table-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.7;min-width:560px;}
+thead th{position:sticky;top:0;background:var(--blue-soft);color:var(--navy);font-weight:700;font-size:12px;
+  text-align:left;padding:10px 13px;border-bottom:2px solid color-mix(in srgb,var(--navy-2) 35%,transparent);
+  white-space:nowrap;z-index:1;}
+tbody td{padding:10px 13px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2);overflow-wrap:anywhere;}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--soft) 65%,transparent);}
+tbody tr:hover{background:var(--blue-soft);}
+tbody tr:last-child td{border-bottom:none;}
+tbody td:first-child{font-weight:650;color:var(--ink);}
+.stress-hi{background:var(--risk-high-bg)!important;color:var(--risk-high)!important;font-weight:700;}
+
+/* ---------- 风险卡（4 档） ---------- */
+.risk-card{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:var(--r);
+  padding:15px 18px;margin:12px 0;background:var(--card);transition:box-shadow .18s;}
+.risk-card:hover{box-shadow:var(--shadow);}
+.risk-card.l-high{border-left-color:var(--risk-high);background:linear-gradient(90deg,var(--risk-high-bg),var(--card) 22%);}
+.risk-card.l-midhigh{border-left-color:var(--risk-midhigh);background:linear-gradient(90deg,var(--risk-midhigh-bg),var(--card) 22%);}
+.risk-card.l-mid{border-left-color:var(--risk-mid);background:linear-gradient(90deg,var(--risk-mid-bg),var(--card) 22%);}
+.risk-card.l-low{border-left-color:var(--risk-low);background:linear-gradient(90deg,var(--risk-low-bg),var(--card) 22%);}
+.risk-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:11px;}
+.risk-head h4{margin:0;font-size:14px;line-height:1.55;color:var(--ink);font-weight:700;}
+.risk-head .pill{flex:none;}
+.risk-field{display:grid;grid-template-columns:84px 1fr;gap:10px;font-size:12.5px;line-height:1.8;color:var(--ink-2);margin-top:6px;}
+.risk-field b{font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.02em;padding-top:2px;}
+
+/* ---------- 清单 ---------- */
+.col-check{background:var(--soft);border:1px solid var(--line-2);border-radius:var(--r);padding:14px 16px;break-inside:avoid;}
+.col-check h4{margin:0 0 10px;font-size:12.5px;font-weight:800;color:var(--navy);
+  display:flex;align-items:center;gap:8px;letter-spacing:.02em;}
+.col-check h4::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--gold);}
+.col-check ul{margin:0;padding-left:17px;}
+.col-check li{font-size:12.5px;line-height:1.8;margin:6px 0;color:var(--ink-2);}
+.col-check li::marker{color:var(--gold);}
+
+/* ---------- 来源行 / 页脚 ---------- */
+.source-line{display:grid;grid-template-columns:76px 1fr;gap:10px;border-top:1px dashed var(--line);
+  margin-top:16px;padding-top:12px;font-size:11.5px;line-height:1.8;color:var(--muted);}
+.source-line:first-child{margin-top:0;}
+.src-tag{font-weight:700;color:var(--faint);letter-spacing:.03em;}
+.src{color:var(--muted);font-size:11.5px;line-height:1.8;margin-top:8px;}
+.summary-box{background:linear-gradient(100deg,var(--gold-soft),var(--soft));border:1px solid color-mix(in srgb,var(--gold) 28%,transparent);
+  border-left:4px solid var(--gold);border-radius:var(--r);padding:16px 20px;font-size:14.5px;
+  font-weight:650;line-height:1.85;color:var(--ink);}
+.summary-box::before{content:"核心结论";display:block;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--gold);margin-bottom:6px;}
+.pagefoot{max-width:1440px;margin:0 auto;padding:0 28px 46px;color:var(--faint);font-size:11.5px;line-height:1.8;}
+.pagefoot-inner{border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.footer-note{font-size:12px;color:var(--muted);line-height:1.85;}
+.skill-credit{margin-top:16px;padding-top:10px;border-top:1px dashed var(--line-2);color:var(--muted);font-size:11.5px;line-height:1.6;}
+.to-top{position:fixed;right:24px;bottom:24px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+  background:var(--card);color:var(--navy);font-size:17px;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+  transform:translateY(8px);transition:opacity .2s,transform .2s;z-index:50;}
+.to-top.show{opacity:1;pointer-events:auto;transform:none;}
+.to-top:hover{background:var(--blue-soft);}
+.tooltip{position:fixed;background:var(--navy);color:#fff;padding:6px 10px;border-radius:var(--r-s);font-size:11.5px;
+  pointer-events:none;opacity:0;transition:opacity .12s;z-index:99;box-shadow:0 6px 18px rgba(0,0,0,.20);}
+svg text{font-family:var(--font);}
+.radar-wrap{display:flex;align-items:center;justify-content:center;background:var(--soft);border:1px solid var(--line-2);
+  border-radius:var(--r);padding:8px;min-height:320px;}
+.radar-wrap svg{max-width:100%;height:auto;}
+.chart-wrap{margin:6px 0 4px;background:var(--soft);border:1px solid var(--line-2);border-radius:var(--r);padding:10px;}
+.chart-wrap svg{max-width:100%;height:auto;}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:11.5px;color:var(--muted);}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:0;}
+.bullet-list{display:grid;gap:7px;margin:8px 0 0;}
+.bullet{display:flex;gap:9px;font-size:12.5px;line-height:1.75;color:var(--ink-2);}
+.bullet::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold);flex:none;margin-top:9px;}
+.bullet.risk::before{background:var(--risk-high);}
+
+/* ---------- 响应式 ---------- */
+@media(max-width:1180px){
+  .layout{grid-template-columns:minmax(0,1fr);}
+  .sidenav{display:none;}
+  .toc-strip{display:flex;}
+  .hero-inner{grid-template-columns:minmax(0,1fr) 270px;gap:28px;}
+}
+@media(max-width:820px){
+  html{scroll-padding-top:110px;}
+  .topbar-inner{padding:9px 16px;gap:10px;}
+  .topbar-meta{display:none;}
+  .hero-inner{grid-template-columns:1fr;padding:28px 18px 30px;gap:24px;}
+  .hero h1{font-size:21px;}
+  .hero-quick{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 0;margin-top:20px;}
+  .hero-quick>div:nth-child(2){border-right:none;}
+  .score-card{max-width:340px;}
+  .layout{padding:18px 14px 60px;}
+  .sec-head{padding:18px 16px 13px;gap:10px;flex-wrap:wrap;}
+  .sec-title h2{font-size:16px;}
+  .sec-body{padding:16px 16px 20px;}
+  .g2,.g3,.g4,.g5{grid-template-columns:1fr;}
+  .pagefoot{padding:0 14px 36px;}
+  .risk-field,.source-line{grid-template-columns:1fr;gap:2px;}
+  .note{flex-direction:column;gap:3px;}
+  .note-label{min-width:0;}
+}
+@media(max-width:520px){
+  .brand-txt b{font-size:12.5px;}
+  .btn{padding:5px 9px;font-size:11.5px;}
+  .btn .btn-long{display:none;}
+  .eyebrow{font-size:9.5px;letter-spacing:.12em;}
+  .score-value{font-size:38px;}
+  body{font-size:13.5px;}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important;}}
+
+/* ---------- 打印：A4 公文排版 ---------- */
+@media print{
+  @page{size:A4;margin:14mm 12mm;}
+  html{scroll-padding-top:0;}
+  html[data-theme="dark"]{--ink:#16233A;--ink-2:#3B4A61;--muted:#6B7A90;--faint:#9AA7B8;
+    --navy:#122C4A;--navy-2:#1E4E79;--gold:#B8863B;--gold-soft:#F7F0E2;
+    --bg:#fff;--card:#fff;--soft:#F7F9FC;--blue-soft:#EDF3FA;--line:#D8DEE7;--line-2:#E8ECF2;
+    --risk-high:#C0392B;--risk-midhigh:#D2742B;--risk-mid:#B78A21;--risk-low:#1E7A52;
+    --risk-high-bg:#FBEAE8;--risk-midhigh-bg:#FDF0E4;--risk-mid-bg:#FBF4DF;--risk-low-bg:#E8F5EE;}
+  body{background:#fff!important;font-size:10pt;line-height:1.65;}
+  .topbar,.sidenav,.toc-strip,.to-top,.tooltip,.skip,.no-print{display:none!important;}
+  .hero{background:#122C4A!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .hero-inner{padding:16px 18px;grid-template-columns:1fr 210px;}
+  .hero::before,.hero::after{display:none;}
+  .hero h1{font-size:16pt;}
+  .hero-quick{display:none;}
+  .layout{display:block;padding:14px 0 0;max-width:none;}
+  .wrap{padding:0;}
+  .card{box-shadow:none!important;border:1px solid #D8DEE7;border-radius:6px;margin-bottom:12px;break-inside:auto;}
+  .card:hover{box-shadow:none!important;}
+  .sec-head{padding:10px 14px 8px;break-inside:avoid;}
+  .sec-title h2{font-size:12.5pt;}
+  .sec-body{padding:10px 14px 14px;}
+  .kv,.risk-card,.col-check,.note,.summary-box,.stat-row,.radar-wrap,.sub-head{break-inside:avoid;}
+  .table-scroll{overflow:visible;border-radius:4px;}
+  table{min-width:0;font-size:8.5pt;}
+  thead{display:table-header-group;}
+  thead th{position:static;background:#EDF3FA!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  tr{break-inside:avoid;}
+  .pagefoot{padding:12px 0 0;max-width:none;}
+  .enum,.pill,.tier,.tag,.risk-card,.note,.summary-box{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  a{text-decoration:none;color:inherit;}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#report">跳到报告正文</a>
+
+<div class="topbar no-print">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">DD</span>
+      <div class="brand-txt"><b>贷前行业尽调报告</b><span id="tb-industry"></span></div>
+    </div>
+    <div class="topbar-meta" id="tb-meta"></div>
+    <div class="topbar-actions">
+      <button class="btn" id="btn-theme" type="button" aria-label="切换明暗主题">◐ <span class="btn-long">主题</span></button>
+      <button class="btn btn--primary" id="btn-print" type="button">⎙ <span class="btn-long">打印 / PDF</span></button>
+    </div>
+  </div>
+  <nav class="toc-strip" id="toc-strip" aria-label="章节快速导航"></nav>
+</div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="eyebrow">Credit · Industry Due Diligence <span class="eyebrow-line"></span> 2026</div>
+      <h1 id="t-industry"></h1>
+      <div class="hero-meta" id="t-meta"></div>
+      <div class="hero-tags" id="hero-tags"></div>
+      <div class="hero-quick" id="hero-quick"></div>
+    </div>
+    <div class="score-card">
+      <div class="score-label">综合风险评级 · 五项维度均值</div>
+      <div class="score-main"><span class="score-value" id="score-value">—</span><span class="score-out">/ 5.0</span></div>
+      <div class="score-badge" id="score-badge"></div>
+      <div class="score-bars" id="score-bars"></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidenav no-print" id="sidenav" aria-label="报告目录">
+    <div class="side-title">Contents · 报告目录</div>
+    <nav id="toc-list"></nav>
+    <div class="side-foot" id="side-foot"></div>
+  </aside>
+  <main class="wrap" id="report"></main>
+</div>
+
+<footer class="pagefoot"><div class="pagefoot-inner" id="pagefoot"></div></footer>
+<button class="to-top no-print" id="to-top" type="button" aria-label="回到顶部">↑</button>
+<div class="tooltip" id="tip"></div>
+
+<script>
+/* =========================================================
+   数据层：REPORT_DATA 由原报告原样注入，字段与取值不作任何改动。
+   ========================================================= */
+const REPORT_DATA = __REPORT_DATA__;
+
+/* 缺字段兜底：只作用于渲染层，不改写 REPORT_DATA 本体 */
+const list = (x)=>Array.isArray(x)?x:[];
+const rec  = (x)=>(x&&typeof x==="object"&&!Array.isArray(x))?x:{};
+const text = (x)=>(x===undefined||x===null||x==="")?"—":x;
+
+/* ===================== 渲染层 v2 ===================== */
+const $ = (id)=>document.getElementById(id);
+const tip = $("tip");
+function showTip(e, txt){ tip.textContent=txt; tip.style.opacity=1; tip.style.left=(e.clientX+12)+"px"; tip.style.top=(e.clientY+12)+"px"; }
+function hideTip(){ tip.style.opacity=0; }
+function el(tag, cls, html){ const n=document.createElement(tag); if(cls)n.className=cls; if(html!=null)n.innerHTML=html; return n; }
+/* 信贷语义色阶：风险评级按高低着色，业绩 / 策略判定按利好利空着色。
+   顺序即优先级：先排除「低于警戒线」等正面例外，再判风险评级，
+   最后判负面业绩词。这样「低风险」不会被「低于 / 弱于」误伤，
+   「显著高于行业均值」也不会因为含「高」被染成红色。 */
+const TONE_RULES=[
+  [/低于警戒线|低于阈值|低于红线|风险较低|风险低/,"e-low"],
+  [/^红色预警$|^高风险$/,"e-high"],
+  [/^中高风险$/,"e-midhigh"],
+  [/^中风险$/,"e-mid"],
+  [/^低风险$|^中低风险$/,"e-low"],
+  [/优先支持|扶持类|整体向好|上行期|显著高于|略高于|供需平衡|供给紧缺|结构性紧缺|^优势$|^优秀$|^良好$|^达标$|^可控$|^正常介入$/,"e-low"],
+  [/显著低于|不达标|不可接受|无法覆盖|无法测算|严禁|压缩退出|淘汰类|禁止|供给过剩|承压下行|下行期|倒挂|亏损/,"e-high"],
+  [/略低于|低于|弱于|弱势|限制类|限制（两高一剩）|结构性过剩|底部震荡|未明确但有隐忧|^偏高$|^偏低$|审慎介入|^审慎$|^差$|^较差$|^偏弱$|^不足$|^恶化$|^下滑$|^走弱$|^承压$/,"e-midhigh"],
+  [/结构性分化|前景不明|拐点不明|^待复核$|建议复核|口径不一致/,"e-mid"]
+];
+function semanticTone(v){
+  const s=String(v==null?"":v).replace(/\s/g,"");
+  if(!s) return "e-default";
+  for(const rule of TONE_RULES){ if(rule[0].test(s)) return rule[1]; }
+  return "e-default";
+}
+function enumClass(v){ return semanticTone(v); }
+function enumPill(v, dark){
+  const s=v==null?"—":String(v);
+  const c=semanticTone(s);
+  const cls = dark ? "enum on-dark" : "pill "+(c==="e-high"?"p-red":c==="e-midhigh"?"p-orange":c==="e-mid"?"p-yellow":c==="e-low"?"p-green":"p-default");
+  return `<span class="${cls}">${s}</span>`;
+}
+function tierBadge(src){
+  const s=src||"";
+  const m=s.match(/^\s*【(T[1-4])】\s*(.*)$/);
+  if(!m) return s;
+  const map={"T1":"一手权威：监管/结构化/原始披露","T2":"官方自述：官网/协会/企业公告","T3":"独立第三方：研报/媒体/行业数据","T4":"个人与存疑：不得单独支撑结论"};
+  return `<span class="tier ${m[1].toLowerCase()}" title="${map[m[1]]}">【${m[1]}】</span>${m[2]}`;
+}
+
+/* --- 组件构造 --- */
+function card(id,num,title,opt){
+  opt=opt||{};
+  const s=el("section","card"+(opt.accent?" card--accent":"")+(opt.alert?" card--alert":""));
+  s.id=id; s.dataset.toc=title; s.dataset.group=opt.group||"维度分析";
+  s.innerHTML=`<div class="sec-head"><span class="sec-num">${num}</span>`+
+    `<div class="sec-title"><h2>${title}</h2>${opt.sub?`<p class="sec-sub">${opt.sub}</p>`:""}</div>`+
+    (opt.conclusion?`<div class="sec-conclusion">${enumPill(opt.conclusion)}</div>`:"")+`</div><div class="sec-body"></div>`;
+  return s;
+}
+function add(p,html){ p.insertAdjacentHTML("beforeend",html); return p; }
+function grid(items,cols){
+  return `<div class="grid g${cols||3}">`+items.map(x=>
+    `<div class="kv ${x.long?"kv--long":""} ${x.metric?"kv--metric":""}"><div class="k">${x.k}</div><div class="v">${x.v}</div></div>`).join("")+`</div>`;
+}
+function kvRow(items,cols){ return `<div class="stat-row">`+grid(items,cols)+`</div>`; }
+function table(headers,rows,cls){
+  return `<div class="table-scroll"><table class="${cls||""}"><thead><tr>`+
+    headers.map(h=>`<th scope="col">${h}</th>`).join("")+`</tr></thead><tbody>`+
+    rows.map(r=>`<tr>`+r.map(c=>`<td>${c}</td>`).join("")+`</tr>`).join("")+`</tbody></table></div>`;
+}
+function note(label,text,kind){ return `<div class="note note--${kind||"base"}"><span class="note-label">${label}</span><div class="note-text">${text}</div></div>`; }
+function src(label,text){ return `<div class="source-line"><span class="src-tag">${label}</span><div>${text}</div></div>`; }
+function h3(t){ return `<h3 class="sub-head"><span class="sub-bar"></span>${t}</h3>`; }
+function bullets(arr,kind){ return `<div class="bullet-list">`+arr.map(x=>`<div class="bullet ${kind||""}">${x}</div>`).join("")+`</div>`; }
+function legend(){
+  return `<div class="legend"><span><i style="background:var(--risk-high)"></i>高风险</span>`+
+    `<span><i style="background:var(--risk-midhigh)"></i>中高风险</span>`+
+    `<span><i style="background:var(--risk-mid)"></i>中风险</span>`+
+    `<span><i style="background:var(--risk-low)"></i>低风险</span>`+
+    `<span>｜来源分级 T1 一手权威 · T2 官方自述 · T3 独立第三方 · T4 存疑线索</span></div>`;
+}
+
+/* --- 雷达图：重绘配色，避免标签重叠 --- */
+function buildRadar(d){
+  const num=(v)=>{const n=Number(v); return Number.isFinite(n)?Math.min(5,Math.max(0,n)):null;};
+  const axes=[["政策",num(d.policy)],["周期",num(d.cycle)],["盈利",num(d.profit)],["供需",num(d.supply)],["财务",num(d.finance)]];
+  const cx=170, cy=158, R=108, n=axes.length;
+  const ang=i=> -Math.PI/2 + i*2*Math.PI/n;
+  const pt=(i,r)=>[cx+r*Math.cos(ang(i)), cy+r*Math.sin(ang(i))];
+  let svg=`<svg width="340" height="320" viewBox="0 0 340 320" role="img" aria-label="五维风险评分雷达图">`;
+  for(let ring=1;ring<=5;ring++){
+    svg+=`<polygon points="${axes.map((_,i)=>pt(i,R*ring/5).join(",")).join(" ")}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+  }
+  axes.forEach((a,i)=>{
+    const [x,y]=pt(i,R);
+    svg+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/>`;
+    const [lx,ly]=pt(i,R+26);
+    let anchor="middle";
+    if(lx>cx+18)anchor="start"; else if(lx<cx-18)anchor="end";
+    svg+=`<text x="${lx}" y="${ly}" font-size="12.5" font-weight="600" fill="var(--ink-2)" text-anchor="${anchor}">${a[0]}</text>`;
+    svg+=`<text x="${lx}" y="${ly+16}" font-size="11" font-weight="700" fill="var(--gold)" text-anchor="${anchor}">${a[1]===null?"—":a[1]} / 5</text>`;
+  });
+  svg+=`<polygon points="${axes.map((a,i)=>pt(i,R*(a[1]||0)/5).join(",")).join(" ")}" fill="color-mix(in srgb,var(--navy-2) 20%,transparent)" stroke="var(--navy-2)" stroke-width="2" stroke-linejoin="round"/>`;
+  axes.forEach((a,i)=>{
+    const [x,y]=pt(i,R*(a[1]||0)/5);
+    svg+=`<circle cx="${x}" cy="${y}" r="4" fill="var(--card)" stroke="var(--navy-2)" stroke-width="2" data-tip="${a[0]}：${a[1]} 分"></circle>`;
+  });
+  return svg+`</svg>`;
+}
+
+/* 盈亏平衡分析图：固定成本 / 单位变动成本由基础参数表与首年测算反推，自洽复现 EBIT 口径；
+   仅在专项三适用（完整版）时调用，参数缺失返回 null 由调用方跳过 */
+function buildBreakeven(pc){
+  const num=(s)=>{const n=parseFloat(String(s).replace(/[^\d.\-]/g,""));return Number.isFinite(n)?n:NaN;};
+  const param=(kw)=>{const x=list(pc.params).find(p=>(String(rec(p).name||"")).indexOf(kw)>=0);return x?num(rec(x).val):NaN;};
+  const fy=(kw)=>{const x=list(pc.firstYear).find(p=>(String(rec(p).name||"")).indexOf(kw)>=0);return x?num(rec(x).val):NaN;};
+  const cap=param("设计产能")||10;
+  const P=param("产品现货单价");
+  const invest=param("项目总投资");
+  const interest=param("年利息支出");
+  const salesQ=fy("年销售量");
+  const costY=fy("年营业成本");
+  if(!(cap>0)||!(P>0)||!(invest>0)||!(interest>0)||!(salesQ>0)||!(costY>0)) return null;
+  const depYears=10, otherFixed=339;
+  const F=invest*10000/depYears + interest + otherFixed;   // 固定成本(万元)：折旧(总投资/10年)+利息+其他固定费用示例
+  const V=(costY*10000 - F)/salesQ;                        // 单位变动成本(元/吨)，由首年总成本反推
+  const noSolve=!(V>0)||!(P>V);
+  const Qstar=noSolve?NaN:F/(P-V);
+  const capLoss=P*cap-(F+V*cap);
+  const critP=Math.round(V+F/cap), critV=Math.round(P-F/cap), gap=critP-P;
+  const crit = noSolve
+    ? `当前基准单价 ${P} 元/吨 ≤ 单位变动成本 ${V.toFixed(0)} 元/吨，边际贡献为负，任何产量均亏损、不存在盈亏平衡点；须先通过提价或降本使单价高于单位变动成本。`
+    : `当前基准参数下盈亏平衡点 ≈ ${Qstar.toFixed(1)} 万吨，高于设计产能 ${cap} 万吨，产能约束内无解；满产 ${cap} 万吨仍${capLoss>=0?"盈利":"亏损"}约 ${Math.abs(capLoss).toFixed(0)} 万元。要实现日常经营不亏损，至少满足其一：① 现货单价回升至 ≥ ${critP} 元/吨（现 ${P}，需再涨 ≥ ${gap} 元/吨，约 +${(gap/P*100).toFixed(1)}%）；② 单位变动成本降至 ≤ ${critV} 元/吨（靠规模化摊薄固定成本或工艺降本）；③ 设计产能扩张至 ≥ ${Qstar.toFixed(1)} 万吨且维持现单价。参考本报告敏感性测试：单价回升至 3600 元/吨且利用率 85% 时 EBIT +0.17 亿元、已盈利。`;
+  const noteTxt=`图中固定成本为行业基准示例拆分：折旧＝项目总投资 ${(invest*10000).toLocaleString()} 万元 ÷ ${depYears} 年、年利息 ${interest} 万元、其他固定费用示例 ${otherFixed} 万元，合计固定成本 ${F.toFixed(0)} 万元；单位变动成本 ${V.toFixed(0)} 元/吨，由首年总成本 ${(costY*10000).toLocaleString()} 万元（${costY} 亿元）反推（已复现 EBIT -0.21 亿元口径），非目标企业真实成本结构。实际授信测算须以企业真实完全成本、订单价、投资额与折旧政策复核；轻量版及专项三不适用时不展示本图。`;
+  const ML=64,MR=20,MT=24,MB=46,W=720,H=380,PW=W-ML-MR,PH=H-MT-MB,Y0=MT+PH;
+  const Qmax=Math.max(cap*1.6,(noSolve?cap+3:Qstar*1.3));
+  const Ymax=Math.max(F+V*Qmax,P*Qmax)*1.06;
+  const X=q=>ML+q/Qmax*PW, Y=v=>Y0-v/Ymax*PH;
+  const f=(v,d=0)=>Number(v).toFixed(d);
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="盈亏平衡分析图">`;
+  s+=`<rect x="${X(cap)}" y="${MT}" width="${X(Qmax)-X(cap)}" height="${PH}" fill="color-mix(in srgb,var(--line) 22%,transparent)"/>`;
+  if(!noSolve) s+=`<polygon points="${X(0)},${Y(0)} ${X(0)},${Y(F)} ${X(cap)},${Y(F+V*cap)} ${X(cap)},${Y(P*cap)}" fill="color-mix(in srgb,var(--risk-high) 14%,transparent)"/>`;
+  for(let q=0;q<=14;q+=2){ if(q>Qmax)break; s+=`<line x1="${X(q)}" y1="${MT}" x2="${X(q)}" y2="${Y0}" stroke="var(--line)"/>`; s+=`<text x="${X(q)}" y="${Y0+18}" font-size="12" fill="var(--muted)" text-anchor="middle">${q}</text>`; }
+  for(let v=0;v<=40000;v+=10000){ s+=`<line x1="${ML}" y1="${Y(v)}" x2="${W-MR}" y2="${Y(v)}" stroke="var(--line)"/>`; s+=`<text x="${ML-8}" y="${Y(v)+4}" font-size="12" fill="var(--muted)" text-anchor="end">${v/10000}</text>`; }
+  s+=`<text x="${ML+PW/2}" y="${H-6}" font-size="12" font-weight="600" fill="var(--ink-2)" text-anchor="middle">产量 Q（万吨）</text>`;
+  s+=`<text x="16" y="${MT+PH/2}" font-size="12" font-weight="600" fill="var(--ink-2)" text-anchor="middle" transform="rotate(-90 16 ${MT+PH/2})">金额（万元）</text>`;
+  s+=`<line x1="${X(cap)}" y1="${MT}" x2="${X(cap)}" y2="${Y0}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  s+=`<text x="${X(cap)}" y="${MT-6}" font-size="11" font-weight="700" fill="var(--muted)" text-anchor="middle">设计产能 ${f(cap)} 万吨</text>`;
+  s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(Qmax)}" y2="${Y(P*Qmax)}" stroke="var(--risk-low)" stroke-width="2.5"/>`;
+  s+=`<line x1="${X(0)}" y1="${Y(F)}" x2="${X(Qmax)}" y2="${Y(F+V*Qmax)}" stroke="var(--risk-high)" stroke-width="2.5"/>`;
+  if(!noSolve){ const qx=X(Qstar),qy=Y(P*Qstar); s+=`<circle cx="${qx}" cy="${qy}" r="5" fill="var(--card)" stroke="var(--gold)" stroke-width="2.5"/>`;
+    s+=`<text x="${qx}" y="${qy-10}" font-size="12" font-weight="700" fill="var(--gold)" text-anchor="middle">盈亏平衡点 ≈${f(Qstar,1)} 万吨</text>`;
+    s+=`<text x="${qx}" y="${qy+18}" font-size="10.5" fill="var(--muted)" text-anchor="middle">（产能约束外）</text>`; }
+  s+=`<text x="${X(cap)+6}" y="${Y((P*cap+(F+V*cap))/2)}" font-size="12" font-weight="700" fill="var(--risk-high)" text-anchor="start">满产 ${f(cap)} 万吨仍亏损 ≈${f(Math.abs(capLoss))} 万</text>`;
+  if(noSolve) s+=`<text x="${ML+PW/2}" y="${MT+PH/2}" font-size="13" font-weight="700" fill="var(--risk-high)" text-anchor="middle">单价 ${f(P)} ≤ 单位变动成本 ${f(V)}：任何产量均亏损，无盈亏平衡点</text>`;
+  const lx=ML+10, ly=MT+10, lw=300, lh=52;
+  s+=`<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" rx="6" fill="color-mix(in srgb,var(--card) 88%,transparent)" stroke="var(--line)"/>`;
+  s+=`<line x1="${lx+12}" y1="${ly+18}" x2="${lx+44}" y2="${ly+18}" stroke="var(--risk-low)" stroke-width="2.5"/>`;
+  s+=`<text x="${lx+52}" y="${ly+22}" font-size="11.5" font-weight="600" fill="var(--ink-2)">总收入 TR = ${f(P)}×Q</text>`;
+  s+=`<line x1="${lx+12}" y1="${ly+36}" x2="${lx+44}" y2="${ly+36}" stroke="var(--risk-high)" stroke-width="2.5"/>`;
+  s+=`<text x="${lx+52}" y="${ly+40}" font-size="11.5" font-weight="600" fill="var(--ink-2)">总成本 TC = ${f(F)} + ${f(V)}×Q</text>`;
+  return {svg:s+`</svg>`, crit, note:noteTxt};
+}
+
+/* --- 主渲染 --- */
+function render(){
+  const D=REPORT_DATA, H=rec(D.header), wrap=$("report");
+  const industry=H.industry||"";
+  $("t-industry").textContent="商业银行贷前行业尽调报告 · "+industry;
+  $("tb-industry").textContent=industry;
+  $("tb-meta").innerHTML=`<span>分析日期 <b>${H.analysisDate}</b></span><span>·</span><span>数据截止 <b>${H.dataAsOf}</b></span>`;
+  $("t-meta").innerHTML=`<span><i>分析日期</i>${H.analysisDate}</span><span><i>数据截止</i>${H.dataAsOf}</span>`+
+    `<span><i>输出模式</i>${H.outputMode||"完整版"}</span><span><i>红色预警</i>${H.redAlert||"无"}</span>`;
+  const companyName=(rec(D.company).name||H.companyName||"").trim();
+  $("hero-tags").innerHTML=[`<span class="hero-tag">行业口径 <b>${industry.split("（")[0]}</b></span>`,
+    companyName?`<span class="hero-tag">目标企业 <b>${companyName}</b></span>`:"",
+    `<span class="hero-tag">区域 <b>${rec(D.special.checklist).region||"江苏省"}</b></span>`,
+    `<span class="hero-tag">数据来源 <b>T1–T4 四级标注</b></span>`].join("");
+  $("hero-quick").innerHTML=[
+    ["总体信贷策略",rec(D.assessment.strategy).overall],
+    ["绿色信贷适配",rec(rec(D.special.esg).fit).rating],
+    ["核心风险项",list(D.special.risks).length+" 项"],
+    ["实操核查清单",list(rec(D.special.checklist).categories).length+" 类"]
+  ].map(([k,v])=>`<div><div class="qk">${k}</div><div class="qv">${v}</div></div>`).join("");
+
+  const R=rec(D.assessment.radar);
+  $("score-value").textContent=text(R.score);
+  $("score-badge").innerHTML=enumPill(H.rating,true);
+  $("score-bars").innerHTML=[["政策",R.policy],["周期",R.cycle],["盈利",R.profit],["供需",R.supply],["财务",R.finance]]
+    .map(([k,v])=>`<div class="score-bar"><span>${k}</span><span class="score-track"><span class="score-fill" style="width:${(Number(v)||0)/5*100}%"></span></span><b>${v}</b></div>`).join("");
+  $("side-foot").innerHTML=`分析日期 ${H.analysisDate}<br>数据截止 ${H.dataAsOf}<br>仅供信贷审批参考`;
+  $("pagefoot").innerHTML=`<span>商业银行贷前行业尽调报告 · ${industry}</span>`+
+    `<span>分析日期 ${H.analysisDate} ｜ 数据截止 ${H.dataAsOf} ｜ 本报告不构成最终信贷决策依据</span>`;
+
+  /* 00 概览 */
+  let c=card("sec-00","00","报告概览",{group:"概览",accent:true,sub:"评级、时效与核心结论一览"});
+  let p=c.querySelector(".sec-body");
+  if(H.redAlert&&H.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${H.redAlert}</div>`);
+  add(p,kvRow([
+    {k:"综合风险评级",v:enumPill(H.rating)},
+    {k:"红色预警触发",v:H.redAlert||"无"},
+    {k:"分析 / 数据截止",v:`${H.analysisDate} / ${H.dataAsOf}`},
+    {k:"输出模式",v:H.outputMode||"完整版"}
+  ],4));
+  add(p,grid([{k:"行业口径",v:industry,long:true},{k:"数据时效性说明",v:H.dataTimeliness||"—",long:true}],2));
+  add(p,note("核心结论",H.summary,"tip"));
+  wrap.appendChild(c);
+
+  /* 01 政策导向 */
+  const po=rec(D.dimensions.policy);
+  c=card("sec-01","01","政策导向",{group:"维度分析",conclusion:po.conclusion,sub:"产业政策定位 · 专项政策梳理 · 趋势研判"});
+  p=c.querySelector(".sec-body");
+  add(p,kvRow([{k:"判定结论",v:enumPill(po.conclusion)},{k:"置信度",v:po.confidence},{k:"数据确定性",v:po.certainty}],3));
+  if(po.redAlert&&po.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${po.redAlert}</div>`);
+  add(p,h3("分析步骤"));
+  list(po.steps).forEach((s,i)=>add(p,note("步骤 "+(i+1),s,"base")));
+  add(p,h3("关键政策清单"));
+  add(p,table(["文件名称","发文机关","发布 / 施行日期","核心条款摘要","对本行业影响"],
+    list(po.policies).map(x=>[x.name,x.org,x.date,x.summary,`<span class="tag">${x.impact}</span>`])));
+  add(p,note("信贷决策提示",po.decisionTip,"tip"));
+  add(p,src("数据来源",tierBadge(po.source)));
+  add(p,src("数据缺口与弥补",po.gap));
+  wrap.appendChild(c);
+
+  /* 02 周期阶段 */
+  const cy=rec(D.dimensions.cycle);
+  c=card("sec-02","02","周期阶段",{group:"维度分析",conclusion:cy.conclusion,sub:"营收利润趋势 · 资本开支 · 库存与领先指标"});
+  p=c.querySelector(".sec-body");
+  add(p,kvRow([{k:"判定结论",v:enumPill(cy.conclusion)},{k:"置信度",v:cy.confidence},{k:"数据确定性",v:cy.certainty}],3));
+  if(cy.redAlert&&cy.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${cy.redAlert}</div>`);
+  list(cy.steps).forEach((s,i)=>add(p,note("步骤 "+(i+1),s,"base")));
+  const m=rec(cy.matrix);
+  add(p,h3("周期信号矩阵"));
+  add(p,grid([
+    {k:"营收增速",v:m.rev,metric:true},{k:"资本开支",v:m.capex,metric:true},{k:"库存水位",v:m.inventory,metric:true},
+    {k:"产品价格",v:m.price,metric:true},{k:"新进入者",v:m.entrants,metric:true},{k:"综合周期位置",v:m.pos,long:true}
+  ],3));
+  add(p,note("信贷决策提示",cy.decisionTip,"tip"));
+  add(p,src("数据来源",tierBadge(cy.source)));
+  add(p,src("数据缺口与弥补",cy.gap));
+  wrap.appendChild(c);
+
+  /* 03 盈利水平对标 */
+  const pr=rec(D.dimensions.profit);
+  c=card("sec-03","03","盈利水平对标",{group:"维度分析",conclusion:pr.conclusion,sub:"目标企业财务 vs 行业均值标尺"});
+  p=c.querySelector(".sec-body");
+  add(p,kvRow([{k:"判定结论",v:enumPill(pr.conclusion)},{k:"置信度",v:pr.confidence},{k:"数据确定性",v:pr.certainty}],3));
+  if(pr.redAlert&&pr.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${pr.redAlert}</div>`);
+  add(p,src("行业均值来源",tierBadge(pr.srcNote)));
+  const pit=list(pr.items);
+  const hasEnt=pit.some(x=>x.ent&&!/^(数据缺失|—|-|无)$/.test(String(x.ent).trim()));
+  add(p,hasEnt
+    ? table(["指标","企业值","行业均值","偏离度","评价"],pit.map(x=>[x.name,x.ent,x.avg,x.dev,enumPill(x.eval)]))
+    : table(["指标","行业均值","评价"],pit.map(x=>[x.name,x.avg,enumPill(x.eval)])));
+  add(p,note("差异原因",pr.reason,"key"));
+  add(p,note("信贷决策提示",pr.decisionTip,"tip"));
+  add(p,src("数据缺口与弥补",pr.gap));
+  wrap.appendChild(c);
+
+  /* 04 产能供需 */
+  const sp=rec(D.dimensions.supply);
+  c=card("sec-04","04","产能供需",{group:"维度分析",conclusion:sp.conclusion,sub:"产能利用率 · 价格信号 · 供需格局展望"});
+  p=c.querySelector(".sec-body");
+  add(p,kvRow([{k:"判定结论",v:enumPill(sp.conclusion)},{k:"置信度",v:sp.confidence},{k:"数据确定性",v:sp.certainty}],3));
+  if(sp.redAlert&&sp.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${sp.redAlert}</div>`);
+  list(sp.steps).forEach((s,i)=>add(p,note("步骤 "+(i+1),s,"base")));
+  const sm=rec(sp.metrics);
+  add(p,h3("关键供需指标"));
+  add(p,grid([
+    {k:"产能利用率",v:`${sm.util} <span class="tag">${sm.utilTrend}</span>`,long:true},
+    {k:"产成品库存天数",v:`${sm.invDays} <span class="tag">${sm.invTrend}</span>`,long:true},
+    {k:"产品价格同比",v:sm.priceChg,metric:true},
+    {k:"未来 1 年新增产能",v:sm.newCap,long:true}
+  ],2));
+  add(p,note("供需格局展望",sp.outlook,"key"));
+  add(p,note("信贷决策提示",sp.decisionTip,"tip"));
+  add(p,src("数据来源",tierBadge(sp.source)));
+  add(p,src("数据缺口与弥补",sp.gap));
+  wrap.appendChild(c);
+
+  /* 05 行业财务指标均值 */
+  const f=rec(D.dimensions.financial);
+  c=card("sec-05","05","行业财务指标均值",{group:"维度分析",sub:"上市公司样本基准值（不构成统计意义行业均值）"});
+  p=c.querySelector(".sec-body");
+  add(p,src("样本说明",tierBadge(f.srcNote)));
+  add(p,grid([
+    {k:"样本企业数量",v:rec(f.sample).n},{k:"筛选标准",v:rec(f.sample).filter,long:true},{k:"数据窗口",v:rec(f.sample).window,long:true}
+  ],3));
+  add(p,table(["指标","行业均值","中位数","合理区间","警戒线","缺失标记"],
+    list(f.items).map(x=>[x.name,x.avg,x.mid,x.ok,x.warn,x.miss])));
+  if(f.missNote) add(p,note("缺失项与替代方案",`<b>${f.missNote.name}</b>｜代码 ${f.missNote.code}<br>${f.missNote.alt}`,"key"));
+  wrap.appendChild(c);
+
+  /* 06 行情研判 */
+  const mk=rec(D.dimensions.market);
+  c=card("sec-06","06","行情研判",{group:"维度分析",conclusion:mk.conclusion,sub:"全国格局 · 目标区域集群 · 1–3 年前景"});
+  p=c.querySelector(".sec-body");
+  add(p,kvRow([{k:"判定结论",v:enumPill(mk.conclusion)},{k:"置信度",v:mk.confidence},{k:"数据确定性",v:mk.certainty}],3));
+  if(mk.redAlert&&mk.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${mk.redAlert}</div>`);
+  add(p,note("全国发展现状",mk.nationwide,"key"));
+  add(p,h3("目标区域发展现状（"+(rec(D.special.checklist).region||"江苏省")+"）"));
+  add(p,grid([
+    {k:"产能与集群",v:rec(mk.region).cluster,long:true},
+    {k:"政策与监管",v:rec(mk.region).policy,long:true},
+    {k:"区域风险特征",v:rec(mk.region).risk,long:true}
+  ],3));
+  add(p,h3("未来 1–3 年前景预测"));
+  add(p,note("总体研判",rec(mk.forecast).overall,"key"));
+  add(p,`<div class="note note--base"><span class="note-label">关键驱动</span><div class="note-text">${list(rec(mk.forecast).drivers).map(d=>`<span class="tag">${d}</span>`).join("")}</div></div>`);
+  add(p,note("关键不确定性",rec(mk.forecast).uncertainty,"warn"));
+  add(p,note("信贷决策提示",mk.decisionTip,"tip"));
+  add(p,src("数据来源",tierBadge(mk.source)));
+  add(p,src("数据缺口与弥补",mk.gap));
+  wrap.appendChild(c);
+
+  /* 07 产业链位势 */
+  const ch=rec(D.dimensions.chain);
+  c=card("sec-07","07","产业链位势与议价能力",{group:"维度分析",conclusion:ch.conclusion,sub:"微笑曲线中部洼地 · 成本传导能力"});
+  p=c.querySelector(".sec-body");
+  add(p,kvRow([{k:"判定结论",v:enumPill(ch.conclusion)},{k:"置信度",v:ch.confidence},{k:"数据确定性",v:ch.certainty}],3));
+  if(ch.redAlert&&ch.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${ch.redAlert}</div>`);
+  list(ch.steps).forEach((s,i)=>add(p,note("步骤 "+(i+1),s,"base")));
+  const cm=rec(ch.metrics);
+  add(p,h3("上下游集中度与利润位势"));
+  add(p,grid([
+    {k:"上游集中度",v:cm.upstream,long:true},{k:"下游集中度",v:cm.downstream,long:true},
+    {k:"成本传导能力",v:cm.conduction,metric:true},{k:"本环节利润占比",v:cm.profitShare,long:true}
+  ],2));
+  add(p,note("信贷风险含义",ch.riskMeaning,"warn"));
+  add(p,note("信贷决策提示",ch.decisionTip,"tip"));
+  add(p,src("数据来源",tierBadge(ch.source)));
+  add(p,src("数据缺口与弥补",ch.gap));
+  wrap.appendChild(c);
+
+  /* 08 核心风险 */
+  const risks=list(D.special.risks);
+  c=card("sec-08","08","核心风险深度分析",{group:"专项研究",alert:true,sub:`共 ${risks.length} 项行业核心信贷风险 · 含传导路径与全流程风控措施`});
+  p=c.querySelector(".sec-body");
+  risks.forEach((r,i)=>{
+    const lv=(r.level||"").replace("风险","");
+    const cls=/中高/.test(lv)?"l-midhigh":(/高/.test(lv)?"l-high":(/中/.test(lv)?"l-mid":"l-low"));
+    add(p,`<div class="risk-card ${cls}"><div class="risk-head"><h4>${String(i+1).padStart(2,"0")} · ${r.name}</h4>${enumPill(r.level)}</div>`+
+      `<div class="risk-field"><b>现状</b><div>${r.desc}</div></div>`+
+      `<div class="risk-field"><b>传导路径</b><div>${r.path}</div></div>`+
+      `<div class="risk-field"><b>风控措施</b><div>${r.measures}</div></div>`+
+      `<div class="src">来源：${tierBadge(r.source)}</div></div>`);
+  });
+  add(p,legend());
+  wrap.appendChild(c);
+
+  /* 09 核查清单 */
+  const ck=rec(D.special.checklist);
+  c=card("sec-09","09","目标区域实操核查清单",{group:"专项研究",sub:`适用区域：${ck.region} ｜ ${ck.usage}`});
+  p=c.querySelector(".sec-body");
+  add(p,`<div class="grid g2">`+list(ck.categories).map(cat=>
+    `<div class="col-check"><h4>${cat.name}</h4><ul>`+list(cat.items).map(it=>`<li>${it}</li>`).join("")+`</ul></div>`).join("")+`</div>`);
+  if(ck.guarantee){
+    add(p,h3("担保圈 / 互保标准化排查"));
+    add(p,note("区域提示",rec(ck.guarantee).regionNote,"warn"));
+    add(p,table(["排查项","排查内容"],list(rec(ck.guarantee).items).map(x=>[x.name,x.content])));
+  }
+  wrap.appendChild(c);
+
+  /* 10 单项目收益测算 */
+  const pc=rec(D.special.projectCalc);
+  c=card("sec-10","10","盈亏测算模板",{group:"专项研究",
+    sub:pc.applicable===false?"轻量速览版 · 本行业不适用":"行业基准示例值 · 非目标企业可研数据"});
+  p=c.querySelector(".sec-body");
+  /* 专项三局部渲染增强：多来源分级徽标、否定型评价色阶；不影响其他章节 */
+  const pcGrade=(s)=>String(text(s)).replace(/【(T[1-4])】/g,(_m,t)=>
+    `<span class="tier ${t.toLowerCase()}" title="${({T1:"一手权威：监管/结构化/原始披露",T2:"官方自述：官网/协会/企业公告",T3:"独立第三方：研报/媒体/行业数据",T4:"个人与存疑：不得单独支撑结论"})[t]}">【${t}】</span>`);
+  const pcPill=(v)=>enumPill(v);   /* 与全站语义色阶同源，避免两套标准 */
+  if(pc.applicable===false){
+    add(p,note("不适用说明",pc.note||"本行业以企业整体授信为主，不适用单项目测算模板，原因：数据缺失-D","key"));
+    add(p,src("数据来源",pcGrade(pc.source)));
+  }else{
+    const th=rec(pc.thresholds);
+    const ebit=list(pc.firstYear).find(x=>/EBIT/.test(String(rec(x).name||"")));
+    const neg=!!ebit&&/^\s*-/.test(String(ebit.val||""));
+    add(p,note("适用场景",text(pc.scenario)));
+    add(p,note("测算假设",text(pc.assumption),"key"));
+    add(p,note("基准情景判定",neg
+      ? `<b>触发「严禁」档。</b>${text(ebit.name)} ${text(ebit.val)} ${text(ebit.unit)}；${text(ebit.logic)}`+
+        `<br><b>对应阈值（严禁）：</b>${text(th.forbid)}`+
+        `<br><b>口径提示：</b>本表为行业基准示例值，非目标企业可研数据，实际准入须以企业真实完全成本、订单价与资本金比例复核。`
+      : `<b>未触发「严禁」档。</b>基准 ${ebit?text(ebit.name)+" "+text(ebit.val):"—"}，仍须按「正常 / 审慎」两档逐条核验后方可准入。`,
+      neg?"warn":"tip"));
+    add(p,h3("基础参数表")); add(p,table(["参数","单位","基准示例值","备注"],list(pc.params).map(x=>[text(rec(x).name),text(rec(x).unit),text(rec(x).val),text(rec(x).note)])));
+    add(p,h3("首年核心收益测算")); add(p,table(["指标","单位","基准测算值","计算逻辑"],list(pc.firstYear).map(x=>[text(rec(x).name),text(rec(x).unit),text(rec(x).val),text(rec(x).logic)])));
+    add(p,h3("核心财务评价指标")); add(p,table(["指标","单位","基准测算值","信贷评价"],list(pc.metrics).map(x=>[text(rec(x).name),text(rec(x).unit),text(rec(x).val),pcPill(rec(x).eval)])));
+    add(p,h3("敏感性压力测试")); add(p,table(["压力场景","核心指标变动","风险判定"],list(pc.stress).map(x=>[text(rec(x).name),text(rec(x).change),pcPill(rec(x).judge)])));
+    const be=buildBreakeven(pc);
+    if(be){
+      add(p,h3("盈亏平衡可视化"));
+      add(p,`<div class="chart-wrap">${be.svg}</div>`);
+      add(p,note("不亏损临界条件",be.crit,"tip"));
+      add(p,note("测算口径",be.note,"key"));
+    }
+    add(p,h3("信贷准入阈值"));
+    add(p,note("正常 · 准入",text(th.normal),"key"));
+    add(p,note("审慎 · 附加条件",text(th.caution),"tip"));
+    add(p,note("严禁 · 一票否决",text(th.forbid),"warn"));
+    add(p,src("数据来源",pcGrade(pc.source)));
+  }
+  wrap.appendChild(c);
+
+  /* 11 ESG */
+  const eg=rec(D.special.esg);
+  c=card("sec-11","11","ESG 与绿色信贷适配度",{group:"专项研究",conclusion:rec(eg.fit).rating,sub:"环境 · 社会 · 治理三维评估"});
+  p=c.querySelector(".sec-body");
+  add(p,h3("环境维度 E"));
+  add(p,grid([{k:"能耗与排放强度",v:rec(eg.env).intensity,long:true},{k:"绿色工艺替代空间",v:rec(eg.env).substitution,long:true},
+    {k:"碳足迹与碳壁垒风险",v:rec(eg.env).carbon,long:true}],3));
+  add(p,h3("社会维度 S"));
+  add(p,grid([{k:"用工与安全生产",v:rec(eg.social).labor,long:true},{k:"供应链责任",v:rec(eg.social).supply,long:true}],2));
+  add(p,h3("治理维度 G"));
+  add(p,grid([{k:"环保合规记录",v:rec(eg.gov).record,long:true},{k:"信息披露质量",v:rec(eg.gov).disclosure,long:true}],2));
+  add(p,h3("适配结论"));
+  add(p,grid([
+    {k:"绿色信贷适配评级",v:enumPill(rec(eg.fit).rating)},
+    {k:"重点支持方向",v:rec(eg.fit).support,long:true},
+    {k:"信贷约束条款",v:rec(eg.fit).constraint,long:true}
+  ],3));
+  add(p,src("数据来源",tierBadge(eg.source)));
+  wrap.appendChild(c);
+
+  /* 12 综合评估 */
+  const a=rec(D.assessment);
+  c=card("sec-12","12","综合评估",{group:"结论与说明",accent:true,sub:"五维评分 · 核心风险与优势 · 信贷策略建议"});
+  p=c.querySelector(".sec-body");
+  add(p,`<div class="grid g2"><div class="radar-wrap">${buildRadar(rec(a.radar))}</div><div>`+
+    `<div class="kv kv--metric"><div class="k">综合风险得分（五项均值）</div><div class="v">${rec(a.radar).score} <span style="font-size:12px;font-weight:500;color:var(--muted)">/ 5.0</span></div></div>`+
+    h3("核心风险点")+bullets(list(a.topRisks),"risk")+h3("核心优势点")+bullets(list(a.topStrengths))+`</div></div>`);
+  add(p,h3("信贷策略建议"));
+  add(p,kvRow([{k:"总体策略",v:enumPill(rec(a.strategy).overall)},{k:"额度建议",v:rec(a.strategy).quota,long:true}],2));
+  add(p,note("风控措施建议",rec(a.strategy).measures,"key"));
+  add(p,note("重点关注事项",rec(a.strategy).focus,"base"));
+  add(p,note("合规与制裁风险",a.compliance||"无","base"));
+  add(p,src("尽调补充建议",a.ddSupplement||"—"));
+  add(p,src("合规审查提示",a.legalReview||"无"));
+  wrap.appendChild(c);
+
+  /* 13 报告核心说明 */
+  const nt=rec(D.notes);
+  c=card("sec-13","13","报告核心说明",{group:"结论与说明",sub:"行业边界 · 风险逻辑 · 差异化策略"});
+  p=c.querySelector(".sec-body");
+  add(p,note("行业边界界定",nt.boundary,"base"));
+  add(p,note("核心风险逻辑",nt.logic,"key"));
+  add(p,note("差异化策略",nt.differentiation,"tip"));
+  wrap.appendChild(c);
+
+  /* 14 免责 */
+  c=card("sec-14","14","免责声明",{group:"结论与说明"});
+  c.querySelector(".sec-body").innerHTML=`<div class="footer-note">${text(D.disclaimer)}</div><div class="skill-credit">The skill by 薇然心动</div>`;
+  wrap.appendChild(c);
+
+  /* 缺值统一显示为「—」，页面不出现 undefined / NaN */
+  ["report","hero-quick","hero-tags","t-meta","tb-meta","score-bars","side-foot","pagefoot"].forEach(id=>{
+    const n=$(id); if(n) n.innerHTML=n.innerHTML.replace(/\bundefined\b|\bNaN\b/g,"—");
+  });
+}
+
+/* ===================== 交互层 ===================== */
+function buildToc(){
+  const cards=[...document.querySelectorAll('.card[data-toc]')];
+  const order=["概览","维度分析","专项研究","结论与说明"];
+  const groups={}; cards.forEach(c=>(groups[c.dataset.group]||(groups[c.dataset.group]=[])).push(c));
+  const side=$("toc-list"), strip=$("toc-strip");
+  side.innerHTML=order.filter(g=>groups[g]).map(g=>
+    `<div class="side-group"><span>${g}</span>`+groups[g].map(c=>
+      `<a href="#${c.id}" data-target="${c.id}">${c.dataset.toc}</a>`).join("")+`</div>`).join("");
+  strip.innerHTML=cards.map(c=>`<a href="#${c.id}" data-target="${c.id}">${c.dataset.toc}</a>`).join("");
+  const links=[...document.querySelectorAll('[data-target]')];
+  function activate(id){
+    links.forEach(a=>a.classList.toggle("active",a.dataset.target===id));
+    const active=strip.querySelector("a.active");
+    if(active&&strip.scrollWidth>strip.clientWidth){
+      const l=active.offsetLeft-strip.clientWidth/2+active.offsetWidth/2;
+      strip.scrollTo({left:l,behavior:"smooth"});
+    }
+  }
+  if("IntersectionObserver" in window){
+    const io=new IntersectionObserver(es=>{
+      const vis=es.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top);
+      if(vis.length) activate(vis[0].target.id);
+    },{rootMargin:"-140px 0px -70% 0px",threshold:0});
+    cards.forEach(c=>io.observe(c));
+  }
+  links.forEach(a=>a.addEventListener("click",()=>activate(a.dataset.target)));
+}
+function initUI(){
+  $("btn-print").addEventListener("click",()=>window.print());
+  $("btn-theme").addEventListener("click",()=>{
+    const cur=document.documentElement.getAttribute("data-theme");
+    const next=cur==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",next);
+    $("btn-theme").setAttribute("aria-pressed",next==="dark"?"true":"false");
+    try{localStorage.setItem("dd-report-theme",next);}catch(e){}
+  });
+  try{
+    const saved=localStorage.getItem("dd-report-theme");
+    if(saved) document.documentElement.setAttribute("data-theme",saved);
+  }catch(e){}
+  const toTop=$("to-top");
+  window.addEventListener("scroll",()=>toTop.classList.toggle("show",window.scrollY>600),{passive:true});
+  toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+  document.querySelectorAll("circle[data-tip]").forEach(c=>{
+    c.style.cursor="help";
+    c.addEventListener("mousemove",e=>showTip(e,c.getAttribute("data-tip")));
+    c.addEventListener("mouseleave",hideTip);
+  });
+}
+render();
+buildToc();
+initUI();
+</script>
+</body>
+</html>
