@@ -813,7 +813,7 @@ function render(){
   }
   wrap.appendChild(c);
 
-  /* 10 单项目收益测算 */
+  /* 10 盈亏测算 */
   const pc=rec(D.special.projectCalc);
   /* 适用性判定：数据优先 + 布尔宽松解析。
      旧实现只认 pc.applicable===false 一个字段，模型一旦把 applicable 写成 false，
@@ -836,7 +836,7 @@ function render(){
     `<span class="tier ${t.toLowerCase()}" title="${({T1:"一手权威：监管/结构化/原始披露",T2:"官方自述：官网/协会/企业公告",T3:"独立第三方：研报/媒体/行业数据",T4:"个人与存疑：不得单独支撑结论"})[t]}">【${t}】</span>`);
   const pcPill=(v)=>enumPill(v);   /* 与全站语义色阶同源，避免两套标准 */
   if(!pcApplicable){
-    add(p,note("不适用说明",pc.note||"本行业以企业整体授信为主，不适用单项目测算模板，原因：数据缺失-D","key"));
+    add(p,note("不适用说明",pc.note||"本行业以企业整体授信为主，不适用盈亏测算模板，原因：数据缺失-D","key"));
     add(p,src("数据来源",pcGrade(pc.source)));
   }else{
     if(pcConflict) add(p,note("口径提示",

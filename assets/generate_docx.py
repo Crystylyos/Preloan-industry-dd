@@ -335,11 +335,11 @@ def build(data, out_path):
             doc.add_paragraph("• " + str(item.get("name", "")) + "：" + str(item.get("content", "")),
                               style="List Bullet")
 
-    # 专项三 单项目收益测算模板
-    add_heading(doc, "专项三 单项目收益测算模板", 1)
+    # 专项三 盈亏测算模板
+    add_heading(doc, "专项三 盈亏测算模板", 1)
     pc = S.get("projectCalc", {})
     if pc.get("applicable") is False:
-        add_para(doc, pc.get("note", "本行业以企业整体授信为主，不适用单项目测算模板，原因：数据缺失-D"))
+        add_para(doc, pc.get("note", "本行业以企业整体授信为主，不适用盈亏测算模板，原因：数据缺失-D"))
     else:
         add_para(doc, "适用场景：" + str(pc.get("scenario", "")) + " ｜ 假设：" + str(pc.get("assumption", "")), size=9)
         if pc.get("params"):

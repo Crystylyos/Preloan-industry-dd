@@ -26,6 +26,7 @@ ROOT = HERE.parent
 TPL = HERE / "report_template.html"
 EXAMPLES = ROOT / "examples"
 sys.path.insert(0, str(HERE))
+sys.dont_write_bytecode = True   # 不生成 __pycache__，避免污染发布包
 
 import validate  # noqa: E402  复用同一套判据
 

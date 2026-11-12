@@ -156,7 +156,7 @@
     },
     "projectCalc": {
       "applicable": false,
-      "note": "本行业以企业整体授信为主，非项目制行业，不适用单项目测算模板，原因：数据缺失-D。",
+      "note": "本行业以企业整体授信为主，非项目制行业，不适用盈亏测算模板，原因：数据缺失-D。",
       "scenario": "",
       "assumption": "",
       "params": [],
