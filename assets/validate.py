@@ -21,6 +21,64 @@ import json
 
 REQUIRED_TOP = ["header", "dimensions", "special", "assessment", "notes", "disclaimer"]
 
+# 专项三「盈亏测算模板」四张表的完备性门槛
+PC_MIN = {"params": 8, "firstYear": 4, "metrics": 4, "stress": 4}
+
+
+def _as_list(x):
+    return x if isinstance(x, list) else []
+
+
+def check_project_calc(data):
+    """专项三一致性校验。
+
+    完整版的定义是「含企业财务对标与单项目测算」（见 SKILL.md 步骤一「输出模式」），
+    因此完整版下专项三必须可渲染。applicable=false 会把整章压成一句「不适用说明」，
+    属数据缺陷，必须阻断交付而不是静默放过——旧模板只认该字段，一旦模型误填，
+    整章测算数据全部丢失且页面看不出异常。
+    """
+    out = []
+    special = data.get("special") if isinstance(data.get("special"), dict) else {}
+    pc = special.get("projectCalc") if isinstance(special.get("projectCalc"), dict) else {}
+    if not pc:
+        return ["专项三缺失：special.projectCalc 不存在，完整版须输出盈亏测算模板"]
+
+    flag = pc.get("applicable")
+    counts = {k: len(_as_list(pc.get(k))) for k in PC_MIN}
+    has_data = any(counts.values())
+    off = flag is False or flag == "false" or flag == 0 or flag == "0"
+    on = flag is True or flag == "true" or flag == 1 or flag == "1"
+
+    header = data.get("header") if isinstance(data.get("header"), dict) else {}
+    mode = str(header.get("outputMode") or "完整版")
+    is_full = "轻量" not in mode
+    company = data.get("company") if isinstance(data.get("company"), dict) else {}
+    n_company = len(_as_list(company.get("items")))
+
+    if not (off or on):
+        out.append("专项三 applicable 非布尔值（实际 %r）：须显式写 true 或 false" % (flag,))
+
+    if is_full and off:
+        if has_data:
+            out.append(
+                "专项三 applicable=false 但已产出测算数据（%s）：标记与数据矛盾，"
+                "整章会被误判为不适用，须改为 true" %
+                "、".join("%s %d 项" % (k, counts[k]) for k in PC_MIN if counts[k]))
+        else:
+            extra = "，且已提供企业财务数据 %d 项" % n_company if n_company else ""
+            out.append(
+                "专项三 applicable=false 且无测算数据%s：完整版须输出盈亏测算模板"
+                "（若确属非项目制行业，请改走轻量速览版，或补充企业整体授信口径的测算）" % extra)
+
+    if on:
+        short = ["%s %d<%d" % (k, counts[k], PC_MIN[k]) for k in PC_MIN if counts[k] < PC_MIN[k]]
+        if short:
+            out.append(
+                "专项三 applicable=true 但测算数据不足门槛：%s"
+                "（门槛 params>=8 / firstYear>=4 / metrics>=4 / stress>=4）" % "、".join(short))
+
+    return out
+
 
 def extract_report_data(html):
     """尽力提取 const REPORT_DATA = {...} 的对象文本（括号配平，忽略字符串内括号）。"""
@@ -104,6 +162,7 @@ def main():
             if missing:
                 warnings.append("REPORT_DATA 缺顶层键：" + ", ".join(missing) +
                                 "（请核对字段级契约 references/data_contract.md）")
+            problems.extend(check_project_calc(data))
         except Exception:
             warnings.append("REPORT_DATA 为非严格 JSON（JS 对象字面量），跳过字段级校验；"
                             "请用浏览器打开模板页脚『校验数据』功能做字段核对")

@@ -39,6 +39,8 @@
 - `risks[]`：{name, level, desc, path, measures, source}
 - `checklist`：region / usage / categories[{name, items[]}] / guarantee{regionNote, items[{name, content}]}
 - `projectCalc`：applicable(bool) / note / scenario / assumption / params[{name,unit,val,note}] / firstYear[{name,unit,val,logic}] / metrics[{name,unit,val,eval}] / stress[{name,change,judge}] / thresholds{normal,caution,forbid} / source
+
+  > **专项三开关规则（硬约束）**：`applicable` 为布尔值，不得用字符串。完整版必须 `true`，且 `params` ≥ 8、`firstYear` ≥ 4、`metrics` ≥ 4、`stress` ≥ 4；仅轻量速览版可 `false` 并注明原因代码。完整版下误填 `false` 会让整章测算不渲染（页面只剩"不适用说明"），`assets/validate.py` 判不合格并阻断交付。
 - `esg`：env{intensity,substitution,carbon} / social{labor,supply} / gov{record,disclosure} / fit{rating,support,constraint} / source
 
 ### assessment

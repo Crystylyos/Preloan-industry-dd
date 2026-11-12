@@ -765,17 +765,34 @@ function render(){
 
   /* 10 单项目收益测算 */
   const pc=rec(D.special.projectCalc);
+  /* 适用性判定：数据优先 + 布尔宽松解析。
+     旧实现只认 pc.applicable===false 一个字段，模型一旦把 applicable 写成 false，
+     即便已产出全套测算数据，整章也只剩一句「不适用说明」，与原版「项目制行业默认
+     输出测算模板」的行为不一致。此处改为：只要存在测算数据即渲染，仅在「明确标记
+     不适用且四张表全空」时才收起整章；标记与数据冲突时照常渲染并提示复核。 */
+  const pcParams=list(pc.params), pcFirst=list(pc.firstYear),
+        pcEvals=list(pc.metrics), pcStress=list(pc.stress);
+  const pcHasData = pcParams.length>0 || pcFirst.length>0 || pcEvals.length>0 || pcStress.length>0;
+  const pcFlag=pc.applicable;
+  const pcOff = (pcFlag===false || pcFlag==="false" || pcFlag===0 || pcFlag==="0");
+  const pcOn  = (pcFlag===true  || pcFlag==="true"  || pcFlag===1 || pcFlag==="1");
+  const pcApplicable = pcHasData || pcOn;
+  const pcConflict = pcOff && pcHasData;
   c=card("sec-10","10","盈亏测算模板",{group:"专项研究",
-    sub:pc.applicable===false?"轻量速览版 · 本行业不适用":"行业基准示例值 · 非目标企业可研数据"});
+    sub:pcApplicable?"行业基准示例值 · 非目标企业可研数据":"轻量速览版 · 本行业不适用"});
   p=c.querySelector(".sec-body");
   /* 专项三局部渲染增强：多来源分级徽标、否定型评价色阶；不影响其他章节 */
   const pcGrade=(s)=>String(text(s)).replace(/【(T[1-4])】/g,(_m,t)=>
     `<span class="tier ${t.toLowerCase()}" title="${({T1:"一手权威：监管/结构化/原始披露",T2:"官方自述：官网/协会/企业公告",T3:"独立第三方：研报/媒体/行业数据",T4:"个人与存疑：不得单独支撑结论"})[t]}">【${t}】</span>`);
   const pcPill=(v)=>enumPill(v);   /* 与全站语义色阶同源，避免两套标准 */
-  if(pc.applicable===false){
+  if(!pcApplicable){
     add(p,note("不适用说明",pc.note||"本行业以企业整体授信为主，不适用单项目测算模板，原因：数据缺失-D","key"));
     add(p,src("数据来源",pcGrade(pc.source)));
   }else{
+    if(pcConflict) add(p,note("口径提示",
+      "数据中 applicable 标记为不适用，但已产出基础参数 / 首年测算 / 评价指标 / 压力测试数据，本页已按测算数据渲染；建议复核 applicable 取值与输出模式是否一致。","warn"));
+    if(!pcHasData) add(p,note("数据缺口",
+      "applicable 标记为适用，但未提供基础参数 / 首年测算 / 评价指标 / 压力测试数据，四张表为空；请补全测算数据后重新生成。","warn"));
     const th=rec(pc.thresholds);
     const ebit=list(pc.firstYear).find(x=>/EBIT/.test(String(rec(x).name||"")));
     const neg=!!ebit&&/^\s*-/.test(String(ebit.val||""));

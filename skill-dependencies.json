@@ -1,6 +1,6 @@
 {
   "name": "preloan-industry-dd",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "required": [
     {
       "id": "python-docx",
