@@ -6,6 +6,7 @@
 
 - **正文标题对齐**：`SKILL.md` 一级标题由「商业银行贷前行业尽调（AI 报告生成）」改为「商业银行贷前行业尽调与报告生成」，与 frontmatter `displayName` 及 README 保持一致。
 - **概述措辞调整**：删去「将方法封装为可直接执行的 Skill」「模型在执行时扮演」这类元描述，改为直述「本技能在执行时，将扮演"商业银行授信审批部高级行业研究员"」；`description` 中「该技能驱动模型扮演」同步改为「本技能在执行时将扮演」。
+- **触发条件与描述同步收窄**：`触发条件` 中「在农商行/银行对公信贷、内训师培训、授信审批辅助场景中…」改为「在商业银行对公信贷、授信审批辅助场景中…」；`description` 中「内训或实际业务需要按统一框架输出行业风险分析」同步改为「银行对公信贷或授信审批辅助需要…」。全篇不再宣称覆盖内训场景，与概述口径一致。
 - **专项三命名全文统一**：`单项目收益测算模板` → `盈亏测算模板`（该名称自 v5.4.0 起已在页面使用，文档与脚本此前未跟上）。涉及 `SKILL.md`（概述、输出模式、轻量路径、description）、`references/output_schema.md`（四大专项列举与 XML 标签 `<专项三_盈亏测算模板>`）、`references/user_prompt_template.md`、`references/troubleshooting.md`、`assets/generate_docx.py`（Word 章节标题与默认说明）、`assets/report_template.html`（章节注释与不适用兜底文案）、`examples/report_data_nonproject.json`。`references/changelog.md` 与 `变更说明.md` 保留更名事实，不回改历史记录。
 - 回归：三场景分支（冲突 / 正常 / 轻量）与跨行业盈亏图（麦芽「万吨」/工程机械「台」）全部通过；自检 28/28；三份样例 JSON 与三个脚本语法校验通过。
 
