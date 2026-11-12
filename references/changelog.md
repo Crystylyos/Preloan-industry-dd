@@ -1,5 +1,14 @@
 # preloan-industry-dd 版本沿革
 
+## v5.4.4（2026-11-13）
+
+本次为**安装说明准确性**与**署名**修订，不改功能与数据契约。
+
+- **报告署名更换**：报告免责声明末行的固定署名由「The skill by 薇然心动」改为「The skill by Crystylyos」，同步 `README.md` 与 `变更说明.md`。该署名写在模板 `sec-14` 的渲染逻辑中，三套发布包与本机安装版一致生效；`LICENSE` 的版权人（Copyright (c) 2026 薇然心动）未动，如需一并调整请告知。
+- **修正 README 安装章节的结构性错误**：原文写「将本仓库内容（即 `preloan-industry-dd__skillhub/` 目录）复制到技能目录」，但 GitHub 仓库**根目录就是技能内容**（`SKILL.md` 与 `assets/`、`references/` 同级），并不存在该子目录——该名称只是安装时目标文件夹的命名。照原文操作会找不到路径。
+- **重写为两种可执行方式**：① `git clone <仓库地址> ~/.workbuddy/skills/preloan-industry-dd__skillhub`（便于 `git pull` 升级）；② 下载 ZIP 后重命名最外层目录再复制。并补充自检提示：「目标目录下应能直接看到 `SKILL.md`，若再套一层说明多了一层」。
+- **`references/install_publish_guide.md` 与 `SKILL.md` 安装章节同步**：原表述把「基础版压缩包」也说成解压得到 `preloan-industry-dd__skillhub/` 文件夹，实际基础版解压后是散文件（`SKILL.md` 在包根层），只有 GitHub 版压缩包才带该文件夹。现按三种来源（基础版 zip / GitHub 版 zip / 仓库克隆）列表说明顶层结构与处理方式，避免多套一层或直接散落。
+
 ## v5.4.3（2026-11-13）
 
 本次为**表述统一**修订，不改任何分析框架、字段与判定逻辑。

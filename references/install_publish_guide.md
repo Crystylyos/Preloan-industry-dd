@@ -1,14 +1,24 @@
 # 安装与发布说明（preloan-industry-dd）
 
-适用版本：5.4.3。版本号见 SKILL.md frontmatter，历史变更见 `references/changelog.md`，出错处置见 `references/troubleshooting.md`。
+适用版本：5.4.4。版本号见 SKILL.md frontmatter，历史变更见 `references/changelog.md`，出错处置见 `references/troubleshooting.md`。
 
 ## 一、安装（Install）
 
-### 方式一：目录放置（推荐，适用于分发 zip）
-1. 解压 `preloan-industry-dd_vX.Y.Z.zip`，得到 `preloan-industry-dd__skillhub/` 文件夹。
-2. 复制到用户级技能目录（同名文件夹将被覆盖，升级即替换）：
-   - Windows / macOS / Linux：用户级技能目录 `~/.workbuddy/skills/`
-3. 在 WorkBuddy 中刷新或重开会话，技能自动加载。
+### 方式一：目录放置（推荐）
+
+三种来源解压后的顶层结构不同，先按下表确认，再放入技能目录：
+
+| 来源 | 解压/克隆后的顶层 | 处理方式 |
+|---|---|---|
+| `preloan-industry-dd_vX.Y.Z.zip`（基础版） | `SKILL.md` 等散文件，**无外层文件夹** | 自行放入 `preloan-industry-dd__skillhub/` |
+| `preloan-industry-dd_vX.Y.Z_github.zip` | `preloan-industry-dd__skillhub/` 文件夹 | 直接复制 |
+| GitHub 仓库 | 根目录即技能内容 | `git clone <仓库地址> ~/.workbuddy/skills/preloan-industry-dd__skillhub` |
+
+1. 按上表确认顶层结构，避免多套一层或直接散落。
+2. 确保目标目录名为 `preloan-industry-dd__skillhub`，置于 `~/.workbuddy/skills/`（同名目录被覆盖，即完成升级）。
+3. 重开或刷新 WorkBuddy 会话，技能自动加载。
+
+> 自检：目标目录下应能直接看到 `SKILL.md`。
 
 ### 方式二：技能市场安装
 若已发布到 WorkBuddy 推荐市场，在对话输入 `安装技能 preloan-industry-dd` 由系统自动完成。

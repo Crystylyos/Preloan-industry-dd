@@ -1,7 +1,7 @@
 ---
 name: preloan-industry-dd
 slug: preloan-industry-dd
-version: "5.4.3"
+version: "5.4.4"
 displayName: 商业银行贷前行业尽调与报告生成
 summary: 按七维度加四大专项框架产出银行贷前行业尽调报告，并生成单文件 HTML 可视化页面与可选 Word 文档。
 tags: [银行信贷, 贷前尽调, 行业风险, 报告生成, HTML报告]
@@ -208,12 +208,12 @@ homepage: https://skillhub.cn/skills/user_63ec19e2/preloan-industry-dd
 
 ## 安装与分发
 
-本技能以文件夹形式分发，安装步骤如下。
+本技能以文件夹形式分发，目标目录名为 `preloan-industry-dd__skillhub`。
 
 方式一 目录放置（推荐）
-1. 解压压缩包，得到 preloan-industry-dd 文件夹。
-2. 复制到本地技能目录：用户级 ~/.workbuddy/skills/ 或项目级 {项目根目录}/.workbuddy/skills/。
-3. 刷新 WorkBuddy 会话，技能自动加载生效。
+1. 取得技能内容。三种来源的顶层结构不同：基础版压缩包解压后为散文件（`SKILL.md` 在压缩包根层，无外层文件夹）；GitHub 版压缩包解压后为 `preloan-industry-dd__skillhub/` 文件夹；也可直接 `git clone <仓库地址> <目标目录>`。
+2. 确保目录名为 `preloan-industry-dd__skillhub`，放入用户级 `~/.workbuddy/skills/` 或项目级 `{项目根目录}/.workbuddy/skills/`（同名目录覆盖即完成升级）。
+3. 刷新或重开 WorkBuddy 会话，技能自动加载生效。自检：目标目录下应能直接看到 `SKILL.md`。
 
 方式二 技能市场安装
 若已发布到 WorkBuddy 推荐市场，在对话输入"安装技能 preloan-industry-dd"由系统自动完成。
