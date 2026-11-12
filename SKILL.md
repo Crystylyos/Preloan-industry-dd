@@ -1,7 +1,7 @@
 ---
 name: preloan-industry-dd
 slug: preloan-industry-dd
-version: "5.4.5"
+version: "1.0.5"
 displayName: 商业银行贷前行业尽调与报告生成
 summary: 按七维度加四大专项框架产出银行贷前行业尽调报告，并生成单文件 HTML 可视化页面与可选 Word 文档。
 tags: [银行信贷, 贷前尽调, 行业风险, 报告生成, HTML报告]
