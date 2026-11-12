@@ -61,4 +61,4 @@ skill-dependencies.json     依赖声明
 
 ## 许可
 
-[MIT](LICENSE) — Copyright (c) 2026 薇然心动
+[MIT](LICENSE) — Copyright (c) 2026 Crystylyos
