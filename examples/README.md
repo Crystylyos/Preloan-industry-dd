@@ -5,7 +5,7 @@
 | 文件 | 场景 | 专项三 | 看点 |
 |---|---|---|---|
 | `report_data_full.json` | 工程机械（项目制，完整版） | `applicable: true` | 8 参数 / 4 项首年测算 / 4 指标 / 4 压力场景齐全，含 `chart` 覆盖折旧与固定费用 |
-| `report_data_light.json` | 光伏（轻量速览版） | `applicable: false` | 无企业数据，维度三自动收起企业值列，专项三收起整章 |
+| `report_data_light.json` | 光伏（轻量速览版） | `applicable: true` | 无企业数据，但用**行业基准参数**输出专项三；维度三自动收起企业值列 |
 | `report_data_nonproject.json` | 钢材贸易（非项目制，完整版） | `applicable: false` + 原因代码 | 演示「非项目制」合法例外：note 注明`非项目制`/`数据缺失-D` 即可通过校验 |
 
 > 样例中企业名称与财务数字均为**演示用示例数据**，不代表任何真实主体；行业判断仅作结构示范，不可直接用于授信决策。

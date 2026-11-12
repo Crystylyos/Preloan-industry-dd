@@ -141,16 +141,45 @@
       }
     },
     "projectCalc": {
-      "applicable": false,
-      "note": "数据缺失-D（轻量版不适用）：本次为轻量速览，未采集项目级投资与成本参数，专项三不展开。",
-      "scenario": "",
-      "assumption": "",
-      "params": [],
-      "firstYear": [],
-      "metrics": [],
-      "stress": [],
-      "thresholds": { "normal": "", "caution": "", "forbid": "" },
-      "source": "【T3】行业基准示例（本次未展开）"
+      "applicable": true,
+      "note": "行业基准示例值 · 非目标企业：无企业财务数据时，用行业通用参数判断该行业在基准条件下项目是否可行；实际授信须替换为企业真实成本结构。",
+      "scenario": "200 MW/年晶硅组件产线新建或技改项目，用于判断产能类授信能否由项目自身现金流覆盖",
+      "assumption": "区域平均水平与行业通用参数，非目标企业可研数据",
+      "params": [
+        { "name": "设计产能", "unit": "MW/年", "val": "200", "note": "组件产线年产能" },
+        { "name": "产品现货单价", "unit": "元/W", "val": "0.85", "note": "组件含税均价" },
+        { "name": "项目总投资", "unit": "亿元", "val": "3.2", "note": "含设备与土建" },
+        { "name": "年利息支出", "unit": "万元", "val": "1200", "note": "贷款占比 60%、利率 3.5% 估算" },
+        { "name": "基准产能利用率", "unit": "%", "val": "75", "note": "行业景气中枢" },
+        { "name": "银行贷款占比", "unit": "%", "val": "60", "note": "项目融资结构" },
+        { "name": "贷款年利率", "unit": "%", "val": "3.5", "note": "制造业中长期贷款" },
+        { "name": "单位产能投资", "unit": "元/W", "val": "1.6", "note": "行业投资强度" }
+      ],
+      "firstYear": [
+        { "name": "年销售量", "unit": "MW", "val": "150", "logic": "设计产能 × 利用率" },
+        { "name": "年营业收入", "unit": "亿元", "val": "1.28", "logic": "销量 × 单价" },
+        { "name": "年营业成本", "unit": "亿元", "val": "1.15", "logic": "材料 + 人工 + 制造费用" },
+        { "name": "EBIT（未扣期间费用与折旧）", "unit": "亿元", "val": "0.13", "logic": "营业收入 − 营业成本" }
+      ],
+      "metrics": [
+        { "name": "全投资内部收益率 IRR", "unit": "%", "val": "7.8", "eval": "达标" },
+        { "name": "静态投资回收期", "unit": "年", "val": "8.1", "eval": "达标" },
+        { "name": "利息保障倍数", "unit": "倍", "val": "2.4", "eval": "审慎" },
+        { "name": "贷款偿还期", "unit": "年", "val": "9.0", "eval": "达标" }
+      ],
+      "stress": [
+        { "name": "组件价格下跌 10%", "change": "IRR 降至 4.9%", "judge": "不可接受" },
+        { "name": "销量下降 20%", "change": "IRR 降至 5.2%", "judge": "审慎" },
+        { "name": "硅料成本上涨 15%", "change": "IRR 降至 6.0%", "judge": "审慎" },
+        { "name": "融资利率上行 100BP", "change": "IRR 降至 7.2%", "judge": "可控" }
+      ],
+      "thresholds": {
+        "normal": "IRR ≥ 8%、利息保障倍数 ≥ 3 倍、产能利用率 ≥ 75%",
+        "caution": "IRR 5%–8%，须追加抵质押与订单锁价，授信仅限流动资金",
+        "forbid": "IRR < 5%，或产能利用率 < 60% 且无改善"
+      },
+      "source": "【T3】光伏行业协会运行数据与行业研报（示例值）",
+      "chart": { "depYears": 10, "otherFixed": 0 }
     },
     "esg": {
       "env": { "intensity": "单位产值能耗较高", "substitution": "清洁电力替代空间大", "carbon": "出口面临碳壁垒敞口" },

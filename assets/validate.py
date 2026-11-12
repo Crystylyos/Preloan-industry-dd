@@ -33,10 +33,13 @@ def _as_list(x):
 def check_project_calc(data):
     """专项三一致性校验。
 
-    完整版的定义是「含企业财务对标与盈亏测算」（见 SKILL.md 步骤一「输出模式」），
-    因此完整版下专项三必须可渲染。applicable=false 会把整章压成一句「不适用说明」，
-    属数据缺陷，必须阻断交付而不是静默放过——旧模板只认该字段，一旦模型误填，
-    整章测算数据全部丢失且页面看不出异常。
+    专项三与「是否有企业数据」解耦：轻量速览版同样输出行业基准测算，
+    因此只要输出专项三，无论完整版还是轻量版，都必须 applicable=true 且满足数据门槛；
+    仅有两种情况可为 false——① 确属非项目制行业（note 注明「非项目制」/「数据缺失-D」）；
+    ② 用户明确要求不出测算。
+
+    该校验针对的是历史缺陷：applicable=false 会把整章压成一句「不适用说明」，
+    即使参数、收益、评价、压力数据齐全也不展示，页面看不出任何异常。
     """
     out = []
     special = data.get("special") if isinstance(data.get("special"), dict) else {}
@@ -63,17 +66,16 @@ def check_project_calc(data):
     note_txt = str(pc.get("note") or "")
     exempt = ("数据缺失-D" in note_txt) or ("非项目制" in note_txt)
 
-    if is_full and off:
-        if has_data:
-            out.append(
-                "专项三 applicable=false 但已产出测算数据（%s）：标记与数据矛盾，"
-                "整章会被误判为不适用，须改为 true" %
-                "、".join("%s %d 项" % (k, counts[k]) for k in PC_MIN if counts[k]))
-        elif not exempt:
-            extra = "，且已提供企业财务数据 %d 项" % n_company if n_company else ""
-            out.append(
-                "专项三 applicable=false 且无测算数据%s：完整版须输出盈亏测算模板；"
-                "确属非项目制行业时，须在 note 注明「非项目制」或「数据缺失-D」" % extra)
+    if off and has_data:
+        out.append(
+            "专项三 applicable=false 但已产出测算数据（%s）：标记与数据矛盾，"
+            "整章会被误判为不适用，须改为 true" %
+            "、".join("%s %d 项" % (k, counts[k]) for k in PC_MIN if counts[k]))
+    elif is_full and off and not exempt:
+        extra = "，且已提供企业财务数据 %d 项" % n_company if n_company else ""
+        out.append(
+            "专项三 applicable=false 且无测算数据%s：完整版须输出盈亏测算模板；"
+            "确属非项目制行业时，须在 note 注明「非项目制」或「数据缺失-D」" % extra)
 
     if on:
         short = ["%s %d<%d" % (k, counts[k], PC_MIN[k]) for k in PC_MIN if counts[k] < PC_MIN[k]]
