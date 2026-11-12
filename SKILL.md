@@ -204,6 +204,7 @@ homepage: https://skillhub.cn/skills/user_63ec19e2/preloan-industry-dd
 - `references/troubleshooting.md`：故障排查与降级指引。出错先查这里：30 秒定位表 + 每条「现象 / 原因 / 处置 / 降级」四段式。
 - `examples/`：三份可直接运行的最小 `REPORT_DATA`（完整版项目制 / 轻量速览版 / 非项目制），配 `README.md` 说明注入、校验与生成 Word 的用法。
 - `assets/selftest.py`：一键自检。校验模板占位符与章节数、样例注入、零外部依赖、专项三契约、Word 与 HTML 风险色同源；加 `--browser` 可追加真实渲染核验。
+- `assets/icon.png`：技能图标（512×512 PNG，圆角外透明，深蓝底 + 罗盘与行业元素）。技能市场与客户端展示用；本机安装态图标由平台按 `iconSource` 下发，替换需在平台上架页同步更新。
 
 ## 安装与分发
 
