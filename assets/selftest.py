@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""preloan-industry-dd · 开箱自检（v5.4.2 新增）
+"""preloan-industry-dd · 开箱自检
 
 把 examples/ 下的样例注入模板，做「结构 + 契约 + 色阶」三层检查，
 用于交付前的快速返检。判据与 assets/validate.py 同源，不另立标准。
@@ -71,6 +71,11 @@ def check_template(tpl):
     chk("占位符唯一（%s）" % PH, tpl.count(PH) == 1, "实际 %d 个" % tpl.count(PH))
     n = len(re.findall(r'card\("sec-\d+"', tpl))
     chk("章节数 = %d" % EXPECT_CARDS, n == EXPECT_CARDS, "实际 %d" % n)
+    nums = re.findall(r'card\("sec-\d+","([^"]*)"', tpl)
+    expect = ["", "维度一", "维度二", "维度三", "维度四", "维度五", "维度六", "维度七",
+              "专项一", "专项二", "专项三", "专项四", "", "", ""]
+    chk("章节编号规则", nums == expect, "实际 %s" % nums)
+    chk("五维评分口径说明", "五维评分口径说明" in tpl and "分值方向" in tpl)
     for kw, label in [("@media print", "打印样式"),
                       ('html[data-theme="dark"]', "暗色主题"),
                       ("prefers-reduced-motion", "减弱动效"),

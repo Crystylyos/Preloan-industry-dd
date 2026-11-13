@@ -1,10 +1,11 @@
 {
   "name": "preloan-industry-dd",
-  "version": "1.0.6",
+  "schema_version": "1",
+  "version": "1.0.7",
   "required": [
     {
       "id": "python-docx",
-      "type": "python-package",
+      "type": "local-tool",
       "purpose": "Word 文档生成（assets/generate_docx.py）",
       "install": "pip install python-docx",
       "fallback": "仅交付 HTML/XML/Markdown，跳过 Word；PDF 由 Word 另存获得"

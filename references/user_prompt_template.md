@@ -43,8 +43,8 @@
 4. 雷达图要求：风险雷达评分必须以交互式雷达图形式展现，刻度与报告中 1-5 分制完全对应，支持悬停查看数值。
 5. 专项模块展示：核心风险按四档分级色卡呈现（高风险红、中高风险橙、中风险黄、低风险绿）；判定徽标按信贷语义着色，低于 / 弱于 / 不达标等负面结论一律红橙警示，利好结论绿色，不得按字面「高 / 中 / 低」着色；核查清单采用分栏排版；测算模板采用表格化展示，压力测试高亮标注。
 6. 兼容性要求：页面自适应 PC 端显示，为单文件 HTML，全站字体统一微软雅黑，无需额外依赖，双击即可打开使用；含侧栏目录、暗色主题与 A4 打印样式。
-7. 轻量版 / 完整版自适应：专项三由 `special.projectCalc.applicable` 控制，维度三按有无企业值自动收放列；页面样式固定，只按 `references/html_ui_spec_v2.md` 契约填入 `REPORT_DATA`。
+7. 轻量版 / 完整版自适应：专项三由 `special.projectCalc.applicable` 控制，维度三按有无企业值自动收放列；页面样式固定，只按 `references/html_ui_spec.md` 契约填入 `REPORT_DATA`。
 
 ---
 
-注：本技能实际执行时，上述占位符由用户在对话中提供，模型按 `references/output_schema.md` 的结构产出报告，并基于 `assets/report_template.html` 生成交付页面。V5.0 起如需 Word/PDF 交付，将 `REPORT_DATA` 导出为 `report_data.json` 后运行 `assets/generate_docx.py` 即可。无需用户手动拼接提示词。
+注：本技能实际执行时，上述占位符由用户在对话中提供，模型按 `references/output_schema.md` 的结构产出报告，并基于 `assets/report_template.html` 生成交付页面。如需 Word/PDF 交付，将 `REPORT_DATA` 导出为 `report_data.json` 后运行 `assets/generate_docx.py` 即可。无需用户手动拼接提示词。

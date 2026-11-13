@@ -1,4 +1,4 @@
-# HTML 报告 UI 设计规范 v2
+# HTML 报告 UI 设计规范
 
 > **用途**：供报告生成类 Skill 复用的 HTML 页面产出契约（设计令牌 + 骨架 + 组件状态 + 渲染契约 + 验收清单）。
 > **适用技能**：`preloan-industry-dd`（商业银行贷前行业尽调）
@@ -54,7 +54,7 @@
 | 语义 | `--risk-high` / `--risk-midhigh` / `--risk-mid` / `--risk-low` | `#C0392B` / `#D2742B` / `#B78A21` / `#1E7A52` | 四档风险等级 |
 | 语义底 | `--risk-*-bg` | `#FBEAE8` / `#FDF0E4` / `#FBF4DF` / `#E8F5EE` | 徽标底、风险卡左侧渐变起点 |
 
-> **理由**：沿用原报告深蓝基线但降饱和、加深度；铜金只承载"决策信息"，避免主色泛滥。风险四档必须独立——原版把「中高」和「高」都渲染成红色，审批时无法区分。
+> **配色规则**：深蓝为基线、降饱和加深度；铜金只承载"决策信息"，避免主色泛滥。风险四档必须独立呈现，「中高风险」与「高风险」不得同色。
 
 ### 2.2 暗色覆盖（`html[data-theme="dark"]`）
 
@@ -72,7 +72,7 @@
 | 维度 | 取值 | 说明 |
 |---|---|---|
 | 字号阶梯 | 10.5 / 11.5 / 12.5 / 13 / 14 / 14.5 / 18.5 / 27px | 徽标·图例 / 标签·来源 / 表格·清单 / 提示 / 正文 / 核心结论 / 章节标题 / Hero 标题 |
-| 行高 | 正文 1.75；长段落 1.85；表格 1.7；标签 1.5 | 原版 1.6 对长段中文过挤 |
+| 行高 | 正文 1.75；长段落 1.85；表格 1.7；标签 1.5 | 中文长段落需更宽松的行距 |
 | 间距 | 4px 基准：4 / 8 / 12 / 16 / 24 / 32 / 48 | 卡片内边距 26px、卡间距 20px、网格 gap 12px |
 | 圆角 | `--r-l:14px` 卡片 / `--r:10px` 内块·表格·风险卡 / `--r-s:6px` 标签·按钮 | 只允许三级，禁止 4/6/8 混用 |
 | 阴影 | 常规 `0 1px 2px rgba(18,44,74,.04), 0 10px 28px rgba(18,44,74,.055)`；hover 加深 | 双层弱阴影，保证卡片边界可辨 |
@@ -81,11 +81,11 @@
 
 ---
 
-## 3. 原版问题清单（反面规则，Skill 不得复现）
+## 3. 禁止的反模式
 
 | 问题 | 规则 |
 |---|---|
-| 15 个章节同款白卡，无权重 | 必须用编号 + 副标题 + 结论徽标建立层级；概览/综合评估用 `card--accent` 金色顶边，风险章节用 `card--alert` 红顶边 |
+| 15 个章节同款白卡，无权重 | 七大维度用「维度一…维度七」、四大专项用「专项一…专项四」文字编号，概览与结论四章不编号；配合副标题与结论徽标建立层级；概览/综合评估用 `card--accent` 金色顶边，风险章节用 `card--alert` 红顶边 |
 | 浅蓝 `.note` 复用几十次，提示与正文等权 | 提示块必须分 4 态，不同类型不同底色与左边框 |
 | 长段落塞进小指标格 | 指标块分 `default / long / metric` 三态，长文本降到 12.5px / 1.85 |
 | 表格无斑马纹、无滚动容器 | 表格必须有 `.table-scroll` 外包裹 + 斑马纹 + hover |
@@ -124,7 +124,7 @@
 
 **Hero 填充规则**：决策速览四项只能取自真实字段——`assessment.strategy.overall`、`special.esg.fit.rating`、`special.risks.length`、`special.checklist.categories.length`。禁止写死行业结论。
 
-**章节契约**：每个章节是 `<section class="card" id="sec-NN" data-toc="标题" data-group="分组">`，含 `.sec-head`（编号 / 标题 / 副标题 / 结论徽标）+ `.sec-body`。分组固定为 `概览 / 维度分析 / 专项研究 / 结论与说明`。
+**章节契约**：每个章节是 `<section class="card" id="sec-NN" data-toc="编号 + 标题" data-group="分组">`，含 `.sec-head`（编号 / 标题 / 副标题 / 结论徽标）+ `.sec-body`。`num` 为空时不渲染 `.sec-num`，`data-toc` 只取标题；维度与专项章节的 `num` 为文字编号，概览与结论章节为空。分组固定为 `概览 / 维度分析 / 专项研究 / 结论与说明`。综合评估章节须含「五维评分口径说明」。
 
 ---
 
@@ -242,7 +242,7 @@
 
 | 函数 | 签名 / 职责 |
 |---|---|
-| `card(id,num,title,opt)` | 建章节；`opt:{group,sub,conclusion,accent,alert}` |
+| `card(id,num,title,opt)` | 建章节；`num` 为文字编号或空串，`opt:{group,sub,conclusion,accent,alert}` |
 | `grid(items,cols)` | `items:[{k,v,long,metric}]` → 指标块网格 |
 | `kvRow(items,cols)` | 章节顶部"判定结论 / 置信度 / 数据确定性"三件套 |
 | `table(headers,rows,cls)` | 统一表格外包裹与表头 |
@@ -255,7 +255,7 @@
 
 **字段映射（不得改名）**：`header` → Hero + 概览；`dimensions.{policy,cycle,profit,supply,financial,market,chain}` → 7 个维度章节；`special.{risks,checklist,projectCalc,esg}` → 4 个专项章节；`assessment` → 综合评估 + Hero 评分仪表；`notes` / `disclaimer` → 说明与免责。
 
-**分支规则**：`projectCalc.applicable === false` 时只渲染不适用说明，不渲染测算表格；`redAlert !== "无"` 才出红色警示条。所有长文本字段一律经 `note()` / `.kv--long`，禁止直接塞进默认指标块。
+**分支规则**：专项三按数据优先判定——有测算数据或 `applicable` 为真即渲染四表，仅在「明确标记不适用且四张表全空」时收起整章；`redAlert !== "无"` 才出红色警示条。所有长文本字段一律经 `note()` / `.kv--long`，禁止直接塞进默认指标块。
 
 ---
 
@@ -263,7 +263,7 @@
 
 - 禁止等权卡片堆叠、禁止用同一个 `.note` 样式承载所有段落。
 - 禁止装饰性渐变、玻璃拟态、入场动画、大圆角、彩色阴影；Hero 渐变是唯一例外（深蓝→深蓝）。
-- 禁止把 `float` 用于布局（原版风险等级用 `float:right`，对齐不稳）；一律 flex / grid。
+- 禁止把 `float` 用于布局（对齐不稳）；一律 flex / grid。
 - 禁止硬编码颜色到组件里（一律走变量）；SVG 也用 `var(--…)`。
 - 禁止 `!important` 滥用（仅打印态强制覆盖允许）。
 - 禁止为了排版概括、删减或"优化"原文结论与不确定性表述。
@@ -281,6 +281,7 @@
 | JS 语法 | `node --check`（提取 `<script>`）通过 |
 | 占位符 | 模板占位符已全部替换 |
 | 章节完整 | `card("sec-` 计数 = 预期章节数（本例 15） |
+| 章节编号 | 依次为 空 / 维度一…维度七 / 专项一…专项四 / 空×3，且含「五维评分口径说明」 |
 | 状态齐全 | 含 `@media print` / `html[data-theme="dark"]` / `@page{size:A4` / `@media(prefers-reduced-motion` |
 | DOM 无异常 | 无头浏览器 `--dump-dom` 后 `undefined` / `NaN` 计数为 0 |
 | 目录生成 | `data-target=` 链接数 ≈ 章节数 × 2（侧栏 + 横滑） |
@@ -297,7 +298,7 @@
 2. 复制 `assets/report_template.html`，把其中唯一的 `__REPORT_DATA__` 占位符逐字换成该对象字面量，另存为交付 HTML；**数据块零改动**，不得改写 CSS/HTML/JS。
 3. 运行 `python assets/validate.py <报告.html>` 完成静态验收；轻量版与完整版各验一份。无头浏览器截图目视（首屏 / 风险卡 / 表格 / 综合评估）为可选增强。
 
-包内相关文件：`assets/report_template.html`（模板）、`assets/validate.py`（验收）、`references/data_contract.md`（数据契约）、`references/html_ui_spec_v2.md`（本规范）。
+包内相关文件：`assets/report_template.html`（模板）、`assets/validate.py`（验收）、`references/data_contract.md`（数据契约）、`references/html_ui_spec.md`（本规范）。
 
 ---
 
@@ -341,4 +342,4 @@ render(); buildToc(); initUI();
 
 ## 附录 C · Skill 生成指令建议措辞
 
-> 生成 HTML 报告时，**只输出 `REPORT_DATA` 对象**，字段与枚举严格遵循 schema；不得输出或修改任何 CSS/HTML/JS 模板代码，不得补全缺失数据、不得编造数值与来源。页面样式由固定模板渲染，规范见 `references/html_ui_spec_v2.md`。生成完成后执行验收清单 §12，未通过则回炉。
+> 生成 HTML 报告时，**只输出 `REPORT_DATA` 对象**，字段与枚举严格遵循 schema；不得输出或修改任何 CSS/HTML/JS 模板代码，不得补全缺失数据、不得编造数值与来源。页面样式由固定模板渲染，规范见 `references/html_ui_spec.md`。生成完成后执行验收清单 §12，未通过则回炉。

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-preloan-industry-dd · V5.0 Word 交付脚本
+preloan-industry-dd · Word 交付脚本
 ---------------------------------------
 读取与本技能 assets/report_template.html 中 REPORT_DATA 同构的 JSON 文件，
 生成一份格式化的商业银行贷前行业尽调 Word 文档（含章节、表格、风险色卡）。
@@ -27,7 +27,7 @@ NAVY = RGBColor(0x1A, 0x2C, 0x4E)
 SLATE = RGBColor(0x46, 0x56, 0x6E)
 INK = RGBColor(0x1F, 0x27, 0x33)
 # 风险四档色：与 assets/report_template.html 的 --risk-* 变量逐值一致，
-# 保证 HTML 与 Word 两份交付物色阶同源（旧版 Word 只有三档，「中高」被并入红档且色值不同）
+# 保证 HTML 与 Word 两份交付物色阶同源（风险四档逐值一致）
 RISK_HIGH = "C0392B"
 RISK_MIDHIGH = "D2742B"
 RISK_MID = "B78A21"
@@ -62,8 +62,7 @@ def set_cell_text(cell, text, bold=False, color=None, size=10, align=None):
 def risk_color(level):
     """返回风险四档色（6 位 hex），与 HTML 模板 --risk-* 色阶逐值一致。
 
-    判定顺序即优先级：先「中高」再「高」。旧版按「含高即红」判定，导致
-    「中高风险」被染成高风险色，四档塌成三档，与页面不一致。
+    判定顺序即优先级：先「中高」再「高」，确保四档独立呈现。
     """
     s = str(level or "")
     if "中高" in s:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-preloan-industry-dd · 环境就绪检查（V5.3.0 引入）
+preloan-industry-dd · 环境就绪检查
 只读检查，不联网、不读取凭据、不修改配置。
 输出：ready / needs_setup（始终返回 0，仅展示；needs_setup 不阻断核心流程）
 """

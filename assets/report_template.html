@@ -141,8 +141,8 @@ html[data-theme="dark"] .btn--primary{background:#24466A;border-color:#3A628C;co
 .card--accent{border-top:3px solid var(--gold);}
 .card--alert{border-top:3px solid var(--risk-high);}
 .sec-head{display:flex;align-items:flex-start;gap:14px;padding:22px 26px 16px;border-bottom:1px solid var(--line-2);}
-.sec-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);background:var(--gold-soft);
-  border:1px solid color-mix(in srgb,var(--gold) 26%,transparent);border-radius:var(--r-s);padding:3px 8px;line-height:1.5;flex:none;margin-top:3px;}
+.sec-num{font-family:inherit;font-size:12px;font-weight:700;color:var(--gold);background:var(--gold-soft);
+  border:1px solid color-mix(in srgb,var(--gold) 26%,transparent);border-radius:var(--r-s);padding:3px 9px;line-height:1.5;flex:none;margin-top:3px;white-space:nowrap;letter-spacing:.04em;}
 .sec-title{flex:1;min-width:0;}
 .sec-title h2{margin:0;font-size:18.5px;line-height:1.4;color:var(--navy);font-weight:700;letter-spacing:.01em;}
 .sec-sub{margin:4px 0 0;font-size:12px;color:var(--muted);line-height:1.6;}
@@ -398,7 +398,7 @@ svg text{font-family:var(--font);}
 
 <script>
 /* =========================================================
-   数据层：REPORT_DATA 由原报告原样注入，字段与取值不作任何改动。
+   数据层：REPORT_DATA 原样注入，字段与取值不作任何改动。
    ========================================================= */
 const REPORT_DATA = __REPORT_DATA__;
 
@@ -453,8 +453,8 @@ function tierBadge(src){
 function card(id,num,title,opt){
   opt=opt||{};
   const s=el("section","card"+(opt.accent?" card--accent":"")+(opt.alert?" card--alert":""));
-  s.id=id; s.dataset.toc=title; s.dataset.group=opt.group||"维度分析";
-  s.innerHTML=`<div class="sec-head"><span class="sec-num">${num}</span>`+
+  s.id=id; s.dataset.toc=num?num+" "+title:title; s.dataset.group=opt.group||"维度分析";
+  s.innerHTML=`<div class="sec-head">${num?`<span class="sec-num">${num}</span>`:""}`+
     `<div class="sec-title"><h2>${title}</h2>${opt.sub?`<p class="sec-sub">${opt.sub}</p>`:""}</div>`+
     (opt.conclusion?`<div class="sec-conclusion">${enumPill(opt.conclusion)}</div>`:"")+`</div><div class="sec-body"></div>`;
   return s;
@@ -645,7 +645,7 @@ function render(){
     `<span>分析日期 ${H.analysisDate} ｜ 数据截止 ${H.dataAsOf} ｜ 本报告不构成最终信贷决策依据</span>`;
 
   /* 00 概览 */
-  let c=card("sec-00","00","报告概览",{group:"概览",accent:true,sub:"评级、时效与核心结论一览"});
+  let c=card("sec-00","","报告概览",{group:"概览",accent:true,sub:"评级、时效与核心结论一览"});
   let p=c.querySelector(".sec-body");
   if(H.redAlert&&H.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${H.redAlert}</div>`);
   add(p,kvRow([
@@ -660,7 +660,7 @@ function render(){
 
   /* 01 政策导向 */
   const po=rec(D.dimensions.policy);
-  c=card("sec-01","01","政策导向",{group:"维度分析",conclusion:po.conclusion,sub:"产业政策定位 · 专项政策梳理 · 趋势研判"});
+  c=card("sec-01","维度一","政策导向",{group:"维度分析",conclusion:po.conclusion,sub:"产业政策定位 · 专项政策梳理 · 趋势研判"});
   p=c.querySelector(".sec-body");
   add(p,kvRow([{k:"判定结论",v:enumPill(po.conclusion)},{k:"置信度",v:po.confidence},{k:"数据确定性",v:po.certainty}],3));
   if(po.redAlert&&po.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${po.redAlert}</div>`);
@@ -676,7 +676,7 @@ function render(){
 
   /* 02 周期阶段 */
   const cy=rec(D.dimensions.cycle);
-  c=card("sec-02","02","周期阶段",{group:"维度分析",conclusion:cy.conclusion,sub:"营收利润趋势 · 资本开支 · 库存与领先指标"});
+  c=card("sec-02","维度二","周期阶段",{group:"维度分析",conclusion:cy.conclusion,sub:"营收利润趋势 · 资本开支 · 库存与领先指标"});
   p=c.querySelector(".sec-body");
   add(p,kvRow([{k:"判定结论",v:enumPill(cy.conclusion)},{k:"置信度",v:cy.confidence},{k:"数据确定性",v:cy.certainty}],3));
   if(cy.redAlert&&cy.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${cy.redAlert}</div>`);
@@ -694,7 +694,7 @@ function render(){
 
   /* 03 盈利水平对标 */
   const pr=rec(D.dimensions.profit);
-  c=card("sec-03","03","盈利水平对标",{group:"维度分析",conclusion:pr.conclusion,sub:"目标企业财务 vs 行业均值标尺"});
+  c=card("sec-03","维度三","盈利水平对标",{group:"维度分析",conclusion:pr.conclusion,sub:"目标企业财务 vs 行业均值标尺"});
   p=c.querySelector(".sec-body");
   add(p,kvRow([{k:"判定结论",v:enumPill(pr.conclusion)},{k:"置信度",v:pr.confidence},{k:"数据确定性",v:pr.certainty}],3));
   if(pr.redAlert&&pr.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${pr.redAlert}</div>`);
@@ -711,7 +711,7 @@ function render(){
 
   /* 04 产能供需 */
   const sp=rec(D.dimensions.supply);
-  c=card("sec-04","04","产能供需",{group:"维度分析",conclusion:sp.conclusion,sub:"产能利用率 · 价格信号 · 供需格局展望"});
+  c=card("sec-04","维度四","产能供需",{group:"维度分析",conclusion:sp.conclusion,sub:"产能利用率 · 价格信号 · 供需格局展望"});
   p=c.querySelector(".sec-body");
   add(p,kvRow([{k:"判定结论",v:enumPill(sp.conclusion)},{k:"置信度",v:sp.confidence},{k:"数据确定性",v:sp.certainty}],3));
   if(sp.redAlert&&sp.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${sp.redAlert}</div>`);
@@ -732,7 +732,7 @@ function render(){
 
   /* 05 行业财务指标均值 */
   const f=rec(D.dimensions.financial);
-  c=card("sec-05","05","行业财务指标均值",{group:"维度分析",sub:"上市公司样本基准值（不构成统计意义行业均值）"});
+  c=card("sec-05","维度五","行业财务指标均值",{group:"维度分析",sub:"上市公司样本基准值（不构成统计意义行业均值）"});
   p=c.querySelector(".sec-body");
   add(p,src("样本说明",tierBadge(f.srcNote)));
   add(p,grid([
@@ -745,7 +745,7 @@ function render(){
 
   /* 06 行情研判 */
   const mk=rec(D.dimensions.market);
-  c=card("sec-06","06","行情研判",{group:"维度分析",conclusion:mk.conclusion,sub:"全国格局 · 目标区域集群 · 1–3 年前景"});
+  c=card("sec-06","维度六","行情研判",{group:"维度分析",conclusion:mk.conclusion,sub:"全国格局 · 目标区域集群 · 1–3 年前景"});
   p=c.querySelector(".sec-body");
   add(p,kvRow([{k:"判定结论",v:enumPill(mk.conclusion)},{k:"置信度",v:mk.confidence},{k:"数据确定性",v:mk.certainty}],3));
   if(mk.redAlert&&mk.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${mk.redAlert}</div>`);
@@ -767,7 +767,7 @@ function render(){
 
   /* 07 产业链位势 */
   const ch=rec(D.dimensions.chain);
-  c=card("sec-07","07","产业链位势与议价能力",{group:"维度分析",conclusion:ch.conclusion,sub:"微笑曲线中部洼地 · 成本传导能力"});
+  c=card("sec-07","维度七","产业链位势与议价能力",{group:"维度分析",conclusion:ch.conclusion,sub:"微笑曲线中部洼地 · 成本传导能力"});
   p=c.querySelector(".sec-body");
   add(p,kvRow([{k:"判定结论",v:enumPill(ch.conclusion)},{k:"置信度",v:ch.confidence},{k:"数据确定性",v:ch.certainty}],3));
   if(ch.redAlert&&ch.redAlert!=="无") add(p,`<div class="redalert">⚠ 红色预警：${ch.redAlert}</div>`);
@@ -786,7 +786,7 @@ function render(){
 
   /* 08 核心风险 */
   const risks=list(D.special.risks);
-  c=card("sec-08","08","核心风险深度分析",{group:"专项研究",alert:true,sub:`共 ${risks.length} 项行业核心信贷风险 · 含传导路径与全流程风控措施`});
+  c=card("sec-08","专项一","核心风险深度分析",{group:"专项研究",alert:true,sub:`共 ${risks.length} 项行业核心信贷风险 · 含传导路径与全流程风控措施`});
   p=c.querySelector(".sec-body");
   risks.forEach((r,i)=>{
     const lv=(r.level||"").replace("风险","");
@@ -802,7 +802,7 @@ function render(){
 
   /* 09 核查清单 */
   const ck=rec(D.special.checklist);
-  c=card("sec-09","09","目标区域实操核查清单",{group:"专项研究",sub:`适用区域：${ck.region} ｜ ${ck.usage}`});
+  c=card("sec-09","专项二","目标区域实操核查清单",{group:"专项研究",sub:`适用区域：${ck.region} ｜ ${ck.usage}`});
   p=c.querySelector(".sec-body");
   add(p,`<div class="grid g2">`+list(ck.categories).map(cat=>
     `<div class="col-check"><h4>${cat.name}</h4><ul>`+list(cat.items).map(it=>`<li>${it}</li>`).join("")+`</ul></div>`).join("")+`</div>`);
@@ -816,10 +816,8 @@ function render(){
   /* 10 盈亏测算 */
   const pc=rec(D.special.projectCalc);
   /* 适用性判定：数据优先 + 布尔宽松解析。
-     旧实现只认 pc.applicable===false 一个字段，模型一旦把 applicable 写成 false，
-     即便已产出全套测算数据，整章也只剩一句「不适用说明」，与原版「项目制行业默认
-     输出测算模板」的行为不一致。此处改为：只要存在测算数据即渲染，仅在「明确标记
-     不适用且四张表全空」时才收起整章；标记与数据冲突时照常渲染并提示复核。 */
+     只要有测算数据或 applicable 为真即渲染四表；仅「明确标记不适用且四张表全空」
+     时收起整章。标记与数据冲突时照常渲染并提示复核。 */
   const pcParams=list(pc.params), pcFirst=list(pc.firstYear),
         pcEvals=list(pc.metrics), pcStress=list(pc.stress);
   const pcHasData = pcParams.length>0 || pcFirst.length>0 || pcEvals.length>0 || pcStress.length>0;
@@ -828,7 +826,7 @@ function render(){
   const pcOn  = (pcFlag===true  || pcFlag==="true"  || pcFlag===1 || pcFlag==="1");
   const pcApplicable = pcHasData || pcOn;
   const pcConflict = pcOff && pcHasData;
-  c=card("sec-10","10","盈亏测算模板",{group:"专项研究",
+  c=card("sec-10","专项三","盈亏测算模板",{group:"专项研究",
     sub:pcApplicable?"行业基准示例值 · 非目标企业可研数据":"轻量速览版 · 本行业不适用"});
   p=c.querySelector(".sec-body");
   /* 专项三局部渲染增强：多来源分级徽标、否定型评价色阶；不影响其他章节 */
@@ -875,7 +873,7 @@ function render(){
 
   /* 11 ESG */
   const eg=rec(D.special.esg);
-  c=card("sec-11","11","ESG 与绿色信贷适配度",{group:"专项研究",conclusion:rec(eg.fit).rating,sub:"环境 · 社会 · 治理三维评估"});
+  c=card("sec-11","专项四","ESG 与绿色信贷适配度",{group:"专项研究",conclusion:rec(eg.fit).rating,sub:"环境 · 社会 · 治理三维评估"});
   p=c.querySelector(".sec-body");
   add(p,h3("环境维度 E"));
   add(p,grid([{k:"能耗与排放强度",v:rec(eg.env).intensity,long:true},{k:"绿色工艺替代空间",v:rec(eg.env).substitution,long:true},
@@ -895,11 +893,23 @@ function render(){
 
   /* 12 综合评估 */
   const a=rec(D.assessment);
-  c=card("sec-12","12","综合评估",{group:"结论与说明",accent:true,sub:"五维评分 · 核心风险与优势 · 信贷策略建议"});
+  c=card("sec-12","","综合评估",{group:"结论与说明",accent:true,sub:"五维评分 · 核心风险与优势 · 信贷策略建议"});
   p=c.querySelector(".sec-body");
   add(p,`<div class="grid g2"><div class="radar-wrap">${buildRadar(rec(a.radar))}</div><div>`+
     `<div class="kv kv--metric"><div class="k">综合风险得分（五项均值）</div><div class="v">${rec(a.radar).score} <span style="font-size:12px;font-weight:500;color:var(--muted)">/ 5.0</span></div></div>`+
     h3("核心风险点")+bullets(list(a.topRisks),"risk")+h3("核心优势点")+bullets(list(a.topStrengths))+`</div></div>`);
+  /* 五维评分口径说明：静态规则文案，不写入业务数据 */
+  add(p,h3("五维评分口径说明"));
+  add(p,note("分值方向",
+    "五个评分轴各取 1–5 分，分值越高表示该维度信贷风险越大：1 风险很低、2 风险较低、3 风险中等、4 风险较高、5 风险很高。综合风险得分为五项算术平均（保留一位小数），同样按 1→5 风险递增；分值表示相对风险位次，不是违约概率。","base"));
+  add(p,table(["评分轴","基本评分规则（分值随风险升高）"],[
+    ["政策","按产业目录定位与监管导向判分：扶持/中性且无信贷限制取 1–2，政策转向或存在隐性约束取 3，限制类或压降导向取 4，淘汰类、明确要求压降信贷规模取 5。"],
+    ["周期","按营收利润趋势、资本开支、库存与领先指标判分：上行期取 1–2，平稳期取 3，下行或拐点不明取 4，持续下行且无改善迹象取 5。"],
+    ["盈利","以上市公司样本行业均值为标尺，按盈利水平与偏离度判分：显著高于均值取 1–2，持平取 3，略低于取 4，显著低于或行业亏损面扩大取 5；无企业财务数据时按行业整体盈利状况判分并标注「行业基准」。"],
+    ["供需","按产能利用率、库存与价格信号判分：供需平衡或紧缺取 1–2，结构性分化取 3，结构性过剩或价格持续下行取 4，全面过剩且利用率长期低于警戒线取 5。"],
+    ["财务","按样本企业负债率、经营现金流/净利润、应收与存货周转、亏损面判分：指标稳健取 1–2，基本持平取 3，周转恶化或现金流走弱取 4，高杠杆叠加持续亏损取 5。"]
+  ]));
+  add(p,note("边界说明","维度七（产业链位势与议价能力）与专项四（ESG 与绿色信贷适配度）不纳入五轴评分，作为综合评估与信贷策略的独立输入；缺证据的维度须标注「未验证」，不以模型记忆补分。","base"));
   add(p,h3("信贷策略建议"));
   add(p,kvRow([{k:"总体策略",v:enumPill(rec(a.strategy).overall)},{k:"额度建议",v:rec(a.strategy).quota,long:true}],2));
   add(p,note("风控措施建议",rec(a.strategy).measures,"key"));
@@ -911,7 +921,7 @@ function render(){
 
   /* 13 报告核心说明 */
   const nt=rec(D.notes);
-  c=card("sec-13","13","报告核心说明",{group:"结论与说明",sub:"行业边界 · 风险逻辑 · 差异化策略"});
+  c=card("sec-13","","报告核心说明",{group:"结论与说明",sub:"行业边界 · 风险逻辑 · 差异化策略"});
   p=c.querySelector(".sec-body");
   add(p,note("行业边界界定",nt.boundary,"base"));
   add(p,note("核心风险逻辑",nt.logic,"key"));
@@ -919,7 +929,7 @@ function render(){
   wrap.appendChild(c);
 
   /* 14 免责 */
-  c=card("sec-14","14","免责声明",{group:"结论与说明"});
+  c=card("sec-14","","免责声明",{group:"结论与说明"});
   c.querySelector(".sec-body").innerHTML=`<div class="footer-note">${text(D.disclaimer)}</div><div class="skill-credit">The skill by Crystylyos</div>`;
   wrap.appendChild(c);
 
