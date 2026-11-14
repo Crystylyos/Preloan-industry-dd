@@ -38,11 +38,13 @@
 ### special
 - `risks[]`：{name, level, desc, path, measures, source}
 - `checklist`：region / usage / categories[{name, items[]}] / guarantee{regionNote, items[{name, content}]}
-- `projectCalc`：applicable(bool) / note / scenario / assumption / params[{name,unit,val,note}] / firstYear[{name,unit,val,logic}] / metrics[{name,unit,val,eval}] / stress[{name,change,judge}] / thresholds{normal,caution,forbid} / source / chart{qUnit,pUnit,depYears,otherFixed}（可选）
+- `projectCalc`：applicable(bool) / note / scenario / assumption / params[{name,unit,val,note}] / firstYear[{name,unit,val,logic}] / metrics[{name,unit,val,eval}] / stress[{name,change,judge}] / thresholds{normal,caution,forbid} / source / chart{qUnit,pUnit,depYears,otherFixed}（可选）。`depYears` 仅用于会计口径折旧；现金平衡点由「年利息支出 + otherFixed」自动推算，不需要额外字段。`qUnit` / `pUnit` 缺省时分别取自「设计产能」与「产品现货单价」的单位。
 
   > **专项三开关规则（硬约束）**：`applicable` 为布尔值，不得用字符串。**只要输出专项三，无论完整版还是轻量速览版，都必须为 `true`**，且 `params` ≥ 8、`firstYear` ≥ 4、`metrics` ≥ 4、`stress` ≥ 4。轻量速览版同样输出行业基准测算，表头注明「行业基准示例值 · 非目标企业」，不因缺企业数据而省略。仅两种情况可为 `false`：① 确属非项目制行业（纯贸易 / 纯服务），`note` 写明「非项目制」或「数据缺失-D」；② 用户明确要求不出测算。误填 `false` 会让整章只剩「不适用说明」，`assets/validate.py` 判不合格并阻断交付。
 
-  > **单位与盈亏图（重要）**：盈亏平衡图的单位**取自数据、不写在代码里**。`params` 中「设计产能」的 `unit` 决定横轴单位（如 `万吨/年`、`台/年`，显示时去掉「/年」），「产品现货单价」的 `unit` 决定价格单位（如 `元/吨`、`万元/台`）；投资与成本的金额单位按 `亿元 / 万元 / 元` 自动换算到万元。可选 `chart` 用于覆盖折旧年限与其他固定费用（缺省 10 年 / 0）。**换行业务必保留 `unit` 字段**，否则图表回落为「单位 / 元每单位」。
+  > **单位与盈亏图（重要）**：盈亏平衡图的单位**取自数据、不写在代码里**。`params` 中「设计产能」的 `unit` 决定横轴单位（如 `万吨/年`、`台/年`，显示时去掉「/年」），「产品现货单价」的 `unit` 决定价格单位（如 `元/吨`、`万元/台`）；投资与成本的金额单位按 `亿元 / 万元 / 元` 自动换算到万元。可选 `chart` 用于覆盖折旧年限与其他固定费用（缺省 10 年 / 0）。
+  >
+  > **单价的分母必须与产能单位一致**，否则单价与单位变动成本不同量级、无法相减，图会退化为「单价 ≤ 单位变动成本、无平衡点」。例：产能写 `MW/年` 时，单价须写 `万元/MW`（0.85 元/W = 85 万元/MW），不能写 `元/W`；产能写 `台/年` 时，单价写 `万元/台`。换行业务必保留 `unit` 字段，否则图表回落为「单位 / 元每单位」。
 - `esg`：env{intensity,substitution,carbon} / social{labor,supply} / gov{record,disclosure} / fit{rating,support,constraint} / source
 
 ### assessment
@@ -108,7 +110,7 @@
       "assumption": "区域平均水平与行业通用参数，实际项目须替换真实成本结构",
       "params": [
         {"name": "设计产能", "unit": "MW/年", "val": "200", "note": "组件产线年产能"},
-        {"name": "产品现货单价", "unit": "元/W", "val": "0.85", "note": "组件含税均价"},
+        {"name": "产品现货单价", "unit": "万元/MW", "val": "85", "note": "组件含税均价，由 0.85 元/W 折算（1 元/W = 100 万元/MW）"},
         {"name": "项目总投资", "unit": "亿元", "val": "3.2", "note": "含设备与土建"},
         {"name": "年利息支出", "unit": "万元", "val": "1200", "note": "贷款占比 60%、利率 3.5% 估算"},
         {"name": "基准产能利用率", "unit": "%", "val": "75", "note": "行业景气中枢"},

@@ -117,6 +117,11 @@ def check_example(path, tpl, browser):
             bad = re.findall(r"\bundefined\b|\bNaN\b", stripped)
             chk("渲染无 undefined / NaN", not bad, "残留 %d 处" % len(bad))
             chk("渲染含专项三章节", 'id="sec-10"' in dom)
+            pc = (data.get("special") or {}).get("projectCalc") or {}
+            if pc.get("applicable") is True:
+                chk("渲染含会计平衡点", "会计平衡点" in dom)
+                chk("渲染含现金平衡点", "现金平衡点" in dom)
+                chk("图例标注剔除折旧", "剔除折旧" in dom)
 
 
 def check_color(tpl):

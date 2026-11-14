@@ -558,10 +558,12 @@ function buildBreakeven(pc){
   const depYears=Number(ch.depYears)>0?Number(ch.depYears):10;
   const otherFixed=Number.isFinite(Number(ch.otherFixed))?Number(ch.otherFixed):0;
 
-  const F=investW/depYears + interestW + otherFixed;   // 固定成本（万元）
-  const V=(costYW - F)/salesQ;                          // 单位变动成本（与单价同单位）
+  const F=investW/depYears + interestW + otherFixed;   // 会计口径固定成本（含折旧，万元）
+  const Fcash=interestW + otherFixed;                   // 现金口径固定成本（剔除折旧）
+  const V=(costYW - F)/salesQ;                          // 单位变动成本：用会计口径反推，两个平衡点共用
   const noSolve=!(V>0)||!(P>V);
   const Qstar=noSolve?NaN:F/(P-V);
+  const Qcash=noSolve?NaN:Fcash/(P-V);
   const capLoss=P*cap-(F+V*cap);
   const critP=Math.round(V+F/cap), critV=Math.round(P-F/cap), gap=critP-P;
 
@@ -577,7 +579,7 @@ function buildBreakeven(pc){
 
   const ebit=pick(pc.firstYear,"EBIT");
   const ebitTxt=ebit?`（已复现 ${rec(ebit).name} ${rec(ebit).val} ${rec(ebit).unit||""} 口径）`:"";
-  const noteTxt=`图中固定成本为行业基准示例拆分：折旧＝项目总投资 ${investW.toLocaleString()} 万元 ÷ ${depYears} 年、年利息 ${interestW.toLocaleString()} 万元、${otherFixed?`其他固定费用 ${otherFixed} 万元`:"其他固定费用按 0 计（如需计入请在 projectCalc.chart.otherFixed 声明）"}，合计固定成本 ${F.toFixed(0)} 万元；单位变动成本 ${V.toFixed(0)} ${pUnit}，由首年总成本 ${costYW.toLocaleString()} 万元反推${ebitTxt}，非目标企业真实成本结构。实际授信测算须以企业真实完全成本、订单价、投资额与折旧政策复核；轻量版及专项三不适用时不展示本图。`;
+  const noteTxt=`图中固定成本为行业基准示例拆分：折旧＝项目总投资 ${investW.toLocaleString()} 万元 ÷ ${depYears} 年、年利息 ${interestW.toLocaleString()} 万元、${otherFixed?`其他固定费用 ${otherFixed} 万元`:"其他固定费用按 0 计（如需计入请在 projectCalc.chart.otherFixed 声明）"}，合计固定成本 ${F.toFixed(0)} 万元；单位变动成本 ${V.toFixed(0)} ${pUnit}，由首年总成本 ${costYW.toLocaleString()} 万元反推${ebitTxt}，非目标企业真实成本结构。现金口径固定成本 ${Fcash.toFixed(0)} 万元（仅利息与其他固定费用，剔除折旧），对应现金平衡点 ${Qcash.toFixed(1)} ${qUnit}，用于判断经营现金流能否为正；会计与现金两口径的差额即折旧对应的销量负担，现金口径不能替代还款能力判断。实际授信测算须以企业真实完全成本、订单价、投资额与折旧政策复核；轻量版及专项三不适用时不展示本图。`;
 
   const ML=64,MR=20,MT=24,MB=46,W=720,H=380,PW=W-ML-MR,PH=H-MT-MB,Y0=MT+PH;
   const Qmax=Math.max(cap*1.6,noSolve?cap*1.3:Qstar*1.15);
@@ -600,18 +602,25 @@ function buildBreakeven(pc){
   s+=`<text x="${X(cap)}" y="${MT-6}" font-size="11" font-weight="700" fill="var(--muted)" text-anchor="middle">设计产能 ${f(cap)} ${qUnit}</text>`;
   s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(Qmax)}" y2="${Y(P*Qmax)}" stroke="var(--risk-low)" stroke-width="2.5"/>`;
   s+=`<line x1="${X(0)}" y1="${Y(F)}" x2="${X(Qmax)}" y2="${Y(F+V*Qmax)}" stroke="var(--risk-high)" stroke-width="2.5"/>`;
+  s+=`<line x1="${X(0)}" y1="${Y(Fcash)}" x2="${X(Qmax)}" y2="${Y(Fcash+V*Qmax)}" stroke="var(--risk-mid)" stroke-width="2" stroke-dasharray="7 5"/>`;
   if(!noSolve){ const qx=X(Qstar),qy=Y(P*Qstar); s+=`<circle cx="${qx}" cy="${qy}" r="5" fill="var(--card)" stroke="var(--gold)" stroke-width="2.5"/>`;
-    s+=`<text x="${qx}" y="${qy-10}" font-size="12" font-weight="700" fill="var(--gold)" text-anchor="middle">盈亏平衡点 ≈${f(Qstar,1)} ${qUnit}</text>`;
-    s+=`<text x="${qx}" y="${qy+18}" font-size="10.5" fill="var(--muted)" text-anchor="middle">（${Qstar>cap?"产能约束外":"产能约束内"}）</text>`; }
+    s+=`<text x="${qx}" y="${qy-10}" font-size="12" font-weight="700" fill="var(--gold)" text-anchor="middle">会计平衡点 ≈${f(Qstar,1)} ${qUnit}</text>`;
+    s+=`<text x="${qx}" y="${qy+18}" font-size="10.5" fill="var(--muted)" text-anchor="middle">（${Qstar>cap?"产能约束外":"产能约束内"}）</text>`;
+    const cx=X(Qcash),cy=Y(P*Qcash),near=Math.abs(qx-cx)<70;
+    s+=`<circle cx="${cx}" cy="${cy}" r="4" fill="var(--card)" stroke="var(--risk-mid)" stroke-width="2"/>`;
+    s+=`<line x1="${cx}" y1="${cy}" x2="${cx}" y2="${Y0}" stroke="var(--risk-mid)" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>`;
+    s+=`<text x="${cx}" y="${cy+(near?40:26)}" font-size="11" font-weight="700" fill="var(--risk-mid)" text-anchor="middle">现金平衡点 ≈${f(Qcash,1)}</text>`; }
   s+=`<text x="${X(cap)+6}" y="${Y((P*cap+(F+V*cap))/2)}" font-size="12" font-weight="700" fill="var(--risk-high)" text-anchor="start">满产 ${f(cap)} ${qUnit}仍${capLoss>=0?"盈利":"亏损"} ≈${money(Math.abs(capLoss))} ${yU}</text>`;
   if(noSolve) s+=`<text x="${ML+PW/2}" y="${MT+PH/2}" font-size="13" font-weight="700" fill="var(--risk-high)" text-anchor="middle">单价 ${f(P)} ≤ 单位变动成本 ${f(V)}：任何产量均亏损，无盈亏平衡点</text>`;
-  const lx=ML+10, ly=MT+10, lw=336, lh=52;
+  const lx=ML+10, ly=MT+10, lw=336, lh=74;
   s+=`<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" rx="6" fill="color-mix(in srgb,var(--card) 88%,transparent)" stroke="var(--line)"/>`;
   s+=`<line x1="${lx+12}" y1="${ly+18}" x2="${lx+44}" y2="${ly+18}" stroke="var(--risk-low)" stroke-width="2.5"/>`;
   s+=`<text x="${lx+52}" y="${ly+22}" font-size="11.5" font-weight="600" fill="var(--ink-2)">总收入 TR = ${f(P)} ${pUnit} × Q</text>`;
   s+=`<line x1="${lx+12}" y1="${ly+36}" x2="${lx+44}" y2="${ly+36}" stroke="var(--risk-high)" stroke-width="2.5"/>`;
-  s+=`<text x="${lx+52}" y="${ly+40}" font-size="11.5" font-weight="600" fill="var(--ink-2)">总成本 TC = ${f(F)} 万元 + ${f(V)} × Q</text>`;
-  return {svg:s+`</svg>`, crit, note:noteTxt};
+  s+=`<text x="${lx+52}" y="${ly+40}" font-size="11.5" font-weight="600" fill="var(--ink-2)">会计总成本 TC = ${f(F)} 万元 + ${f(V)} × Q</text>`;
+  s+=`<line x1="${lx+12}" y1="${ly+54}" x2="${lx+44}" y2="${ly+54}" stroke="var(--risk-mid)" stroke-width="2" stroke-dasharray="7 5"/>`;
+  s+=`<text x="${lx+52}" y="${ly+58}" font-size="11.5" font-weight="600" fill="var(--ink-2)">现金成本 = ${f(Fcash)} 万元 + ${f(V)} × Q（剔除折旧）</text>`;
+  return {svg:s+`</svg>`, crit:crit+(noSolve?"":` 现金口径（剔除折旧）下，平衡点降至 ≈ ${Qcash.toFixed(1)} ${qUnit}；两者差额 ${(Qstar-Qcash).toFixed(1)} ${qUnit} 即折旧对应的销量负担。`), note:noteTxt};
 }
 
 /* --- 主渲染 --- */
