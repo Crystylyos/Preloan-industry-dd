@@ -1,11 +1,15 @@
 ---
 name: preloan-industry-dd
 slug: preloan-industry-dd
-version: "1.0.8"
+version: "1.0.9"
 agent_created: true
+display_name: '商业银行贷前行业尽调与报告生成'
+display_name_en: 'Bank Credit Pre-loan Industry Due Diligence and Report Generation'
 displayName: 商业银行贷前行业尽调与报告生成
 summary: 按七维度加四大专项框架产出银行贷前行业尽调报告，并生成单文件 HTML 可视化页面与可选 Word 文档。
 tags: [银行信贷, 贷前尽调, 行业风险, 报告生成, HTML报告]
+description_zh: '当需要对公信贷贷前调查中的目标企业所在行业做系统性风险评估时使用本技能。触发场景包括：用户要求生成「行业尽调报告」「贷前行业分析」「行业风险评估」「信贷行业研判」「行业风险报告」，或提及对公授信、贷前调查、行业风险、信贷审批参考、授信准入。本技能以商业银行授信审批部高级行业研究员的视角，按七大基础维度加四大专项加综合评估的 XML 框架产出报告，并生成单文件 HTML 可视化页面，可另附 Word/PDF 文档。仅泛泛了解行业知识时先确认意图。'
+description_en: 'Use this skill when a systematic industry risk assessment is needed for the industry of the target enterprise in corporate credit pre-loan due diligence. Triggers include requests for an industry due diligence report, pre-loan industry analysis, industry risk assessment, credit industry judgement, or industry risk report; mentions of corporate credit approval, pre-loan investigation, industry risk, credit approval reference, or credit access. The skill produces a structured XML report following a seven-dimension plus four-special-topic plus overall-assessment framework, from the perspective of a senior industry analyst in a commercial bank credit approval department, and generates a single-file HTML visual page with optional Word and PDF output. Confirm intent first when the user only asks for general industry knowledge.'
 description: 当需要对公信贷贷前调查中的目标企业所在行业做系统性风险评估时使用本技能。触发场景包括：用户要求生成「行业尽调报告」「贷前行业分析」「行业风险评估」「信贷行业研判」「行业风险报告」，或提及对公授信、贷前调查、行业风险、信贷审批参考、授信准入。本技能以商业银行授信审批部高级行业研究员的视角，按七大基础维度加四大专项加综合评估的 XML 框架产出报告，并生成单文件 HTML 可视化页面，可另附 Word/PDF 文档。仅泛泛了解行业知识时先确认意图。
 license: MIT
 homepage: https://skillhub.cn/skills/user_63ec19e2/preloan-industry-dd
