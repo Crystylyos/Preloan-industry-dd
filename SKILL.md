@@ -1,7 +1,7 @@
 ---
 name: preloan-industry-dd
 slug: preloan-industry-dd
-version: "1.0.9"
+version: "1.0.8"
 agent_created: true
 display_name: '商业银行贷前行业尽调与报告生成'
 display_name_en: 'Bank Credit Pre-loan Industry Due Diligence and Report Generation'
